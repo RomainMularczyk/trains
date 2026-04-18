@@ -1,0 +1,15 @@
+{
+    "user": {
+        "name": "Jovan",
+        "age": 30,
+        "email": "jovan@example.com"
+    },
+    "grade": {
+        "description": "You achieved a grade of {{grade}}"
+    },
+    "steps": [
+        "One",
+        "Two",
+        "Three"
+    ]
+}
