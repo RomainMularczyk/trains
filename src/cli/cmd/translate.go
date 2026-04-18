@@ -12,8 +12,10 @@ import (
 )
 
 var (
-	readFormat string
-	baseDir    string
+	readFormat     string
+	baseDir        string
+	sourceLanguage string
+	targetLanguage string
 )
 
 // translateCmd represents the translate command
@@ -29,23 +31,46 @@ Supports JSON input files with configurable parsing options.`,
 			return
 		}
 
+		fmt.Println(sourceLanguage)
+
 		reader, err := io.Reader(fileFormat)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		files, err := io.DiscoverFiles(baseDir, reader)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println("FILES", files)
+		fmt.Println(reader)
 	},
 }
 
 func init() {
-	translateCmd.Flags().StringVar(&readFormat, "format", "json", "Input file format")
-	translateCmd.Flags().StringVar(&baseDir, "input", ".", "Input directory")
+	translateCmd.Flags().StringVarP(
+		&readFormat,
+		"format",
+		"f",
+		"json",
+		"Input file format",
+	)
+	translateCmd.Flags().StringVarP(
+		&baseDir,
+		"input",
+		"i",
+		".",
+		"Input directory",
+	)
+	translateCmd.Flags().StringVarP(
+		&sourceLanguage,
+		"srcLang",
+		"s",
+		"en",
+		"Source language",
+	)
+	translateCmd.Flags().StringVarP(
+		&targetLanguage,
+		"targetLang",
+		"t",
+		"fr,es",
+		"Target language",
+	)
 	rootCmd.AddCommand(translateCmd)
 
 	// Here you will define your flags and configuration settings.
