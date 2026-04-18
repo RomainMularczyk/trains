@@ -1,7 +1,6 @@
 package json
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"trains/src/core/parser"
