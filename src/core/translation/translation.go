@@ -21,4 +21,16 @@ func (t TranslationUnit) String() string {
 	return string(translationSet)
 }
 
+func (t *TranslationUnit) EstimateTokenNumber() int {
+	TOKEN_PER_TEXT_SEGMENT_HEURISTIC := 4
+	estimateNumberOfTokens := 0
+	for _, segment := range t.Segments {
+		if segment.Type == parser.TextSegment {
+			estimateNumberOfTokens += len(segment.Value) / TOKEN_PER_TEXT_SEGMENT_HEURISTIC
+		}
+	}
+
+	return estimateNumberOfTokens
+}
+
 var translationUnitPool chan TranslationUnit = make(chan TranslationUnit, 500)
