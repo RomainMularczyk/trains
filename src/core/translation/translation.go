@@ -1,16 +1,24 @@
 package translation
 
+import (
+	"encoding/json"
+	"trains/src/core/parser"
+)
+
 type TranslationUnit struct {
-	Fullkey      string
-	Path         []string
-	Source       string
-	Target       string
-	Placeholders []string
-	Metadata     map[string]string
+	Fullkey  string
+	Path     []string
+	Source   string
+	Target   string
+	Segments []parser.Segment
 }
 
-type TranslationSet struct {
-	Units []TranslationUnit
+func (t TranslationUnit) String() string {
+	translationSet, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return "{}"
+	}
+	return string(translationSet)
 }
 
 var translationUnitPool chan TranslationUnit = make(chan TranslationUnit, 500)

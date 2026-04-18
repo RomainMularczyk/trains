@@ -3,13 +3,14 @@ package json
 import (
 	"strconv"
 	"strings"
+	"trains/src/core/parser"
 	"trains/src/core/translation"
 )
 
 type JSONParser struct{}
 
-func (p *JSONParser) Parse(data any) translation.TranslationSet {
-	var translationSet translation.TranslationSet
+func (p *JSONParser) Parse(data any) []translation.TranslationUnit {
+	var translationSet []translation.TranslationUnit
 	p.walk(data, []string{}, &translationSet)
 	return translationSet
 }
@@ -17,7 +18,7 @@ func (p *JSONParser) Parse(data any) translation.TranslationSet {
 func (p *JSONParser) walk(
 	node any,
 	path []string,
-	translationSet *translation.TranslationSet,
+	translationSet *[]translation.TranslationUnit,
 ) {
 	switch node.(type) {
 	// object case
@@ -36,10 +37,11 @@ func (p *JSONParser) walk(
 		fullKey := strings.Join(path, ".")
 
 		unit := translation.TranslationUnit{
-			Fullkey: fullKey,
-			Path:    append([]string{}, path...),
-			Source:  node.(string),
+			Fullkey:  fullKey,
+			Path:     append([]string{}, path...),
+			Source:   node.(string),
+			Segments: parser.Segmentize(node.(string)),
 		}
-		translationSet.Units = append(translationSet.Units, unit)
+		*translationSet = append(*translationSet, unit)
 	}
 }
