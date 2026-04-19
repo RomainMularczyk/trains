@@ -1,24 +1,51 @@
 package orchestration
 
 import (
+	"fmt"
+	"sync"
 	"trains/src/core/io"
+	"trains/src/core/translation"
 )
 
-pathChan := make(chan FileJob, 100)
-fileContentChan := make(chan FileContent, 100)
-translationUnitChan := make(chan TranslationUnit, 100)
-batchChan := make(chan TranslationSet, 100)
+type Pipeline struct{}
 
-go FileExplorerWorker(pathChan)
+func (p *Pipeline) Run(root string, format io.FileFormat) {
+	filePaths := make(chan string)
+	fileContents := make(chan any)
+	translationUnits := make(chan translation.TranslationUnit)
+	batches := make([]translation.TranslationBatch, 0)
 
-for i := 0; i < 10; i++ {
-	go FileWorker(pathChan, fileContentChan)
-}
+	processor, err := io.Processor(format)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-for i := 0; i < 10; i++ {
-	go TranslateWorker(fileContentChan, translationUnitChan)
-}
+	var wg sync.WaitGroup
+	wg.Add(4)
 
-for i := 0; i < 10; i++ {
-	go BatchWorker(translationUnitChan, batchChan)
+	go func() {
+		defer wg.Done()
+		defer close(filePaths)
+		io.FileExplorerWorker(root, processor.Reader, filePaths)
+	}()
+
+	go func() {
+		defer wg.Done()
+		defer close(fileContents)
+		processor.Reader.Read(filePaths, fileContents)
+	}()
+
+	go func() {
+		defer wg.Done()
+		defer close(translationUnits)
+		processor.Parser.Parse(fileContents, translationUnits)
+	}()
+
+	go func() {
+		defer wg.Done()
+		translation.CreateBatch(translationUnits, &batches, 100)
+	}()
+
+	wg.Wait()
 }
