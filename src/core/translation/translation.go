@@ -2,6 +2,7 @@ package translation
 
 import (
 	"encoding/json"
+	"math"
 	"trains/src/core/parser"
 )
 
@@ -22,11 +23,11 @@ func (t TranslationUnit) String() string {
 }
 
 func (t *TranslationUnit) EstimateTokenNumber() int {
-	TOKEN_PER_TEXT_SEGMENT_HEURISTIC := 4
+	TOKEN_PER_TEXT_SEGMENT_HEURISTIC := 4.0
 	estimateNumberOfTokens := 0
 	for _, segment := range t.Segments {
 		if segment.Type == parser.TextSegment {
-			estimateNumberOfTokens += len(segment.Value) / TOKEN_PER_TEXT_SEGMENT_HEURISTIC
+			estimateNumberOfTokens += int(math.Ceil(float64(len(segment.Value)) / TOKEN_PER_TEXT_SEGMENT_HEURISTIC))
 		}
 	}
 
