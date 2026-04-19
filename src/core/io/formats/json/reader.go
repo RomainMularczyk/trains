@@ -8,13 +8,19 @@ import (
 
 type JSONReader struct{}
 
-func (r *JSONReader) Read(path string, content any) error {
-	fileContent, err := os.ReadFile(path)
-	if err != nil {
-		return err
+func (r *JSONReader) Read(path <-chan string, content chan<- any) {
+	for filePath := range path {
+		fileContent, err := os.ReadFile(filePath)
+		if err != nil {
+			continue
+		}
+		var data any
+		err = json.Unmarshal(fileContent, &data)
+		if err != nil {
+			continue
+		}
+		content <- data
 	}
-
-	return json.Unmarshal(fileContent, content)
 }
 
 func (r *JSONReader) Supports(path string) bool {
