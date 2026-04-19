@@ -3,7 +3,7 @@ package io
 import (
 	"fmt"
 	"trains/src/core/io/formats/json"
-	"trains/src/core/io/formats/yaml"
+	"trains/src/core/translation"
 )
 
 type FileFormat int
@@ -13,8 +13,20 @@ const (
 	YAML
 )
 
+type FormatDriver struct {
+	Reader FileReader
+	Parser Parser
+}
+
+type Parser interface {
+	Parse(
+		data <-chan any,
+		translationUnit chan<- translation.TranslationUnit,
+	)
+}
+
 type FileReader interface {
-	Read(path string, content any) error
+	Read(path <-chan string, content chan<- any)
 	Supports(path string) bool
 }
 
@@ -22,20 +34,17 @@ type ReaderContext struct {
 	reader FileReader
 }
 
-func (r *ReaderContext) SetReader(reader FileReader) {
-	r.reader = reader
+func (r *ReaderContext) Read(path <-chan string, value chan<- any) {
+	r.reader.Read(path, value)
 }
 
-func (r *ReaderContext) Read(path string, value any) error {
-	return r.reader.Read(path, value)
-}
-
-func Reader(format FileFormat) (FileReader, error) {
+func Processor(format FileFormat) (*FormatDriver, error) {
 	switch format {
 	case JSON:
-		return &json.JSONReader{}, nil
-	case YAML:
-		return &yaml.YAMLReader{}, nil
+		return &FormatDriver{
+			&json.JSONReader{},
+			&json.JSONParser{},
+		}, nil
 	default:
 		return nil, fmt.Errorf("Unsupported format: %s", format)
 	}
