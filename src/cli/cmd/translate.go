@@ -9,6 +9,7 @@ import (
 	"trains/src/core/io"
 
 	"github.com/spf13/cobra"
+	"trains/src/core/orchestration"
 )
 
 var (
@@ -31,14 +32,8 @@ Supports JSON input files with configurable parsing options.`,
 			return
 		}
 
-		fmt.Println(sourceLanguage)
-
-		reader, err := io.Reader(fileFormat)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(reader)
+		pipe := orchestration.Pipeline{}
+		pipe.Run(baseDir, fileFormat)
 	},
 }
 
