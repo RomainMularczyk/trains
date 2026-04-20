@@ -1,4 +1,4 @@
-package config
+package types
 
 type Translation struct {
 	SourceLanguage Language `validate:"required"`
