@@ -5,6 +5,8 @@ import (
 	"math"
 )
 
+var TOKEN_PER_TEXT_SEGMENT_HEURISTIC = 4.0
+
 type TranslationUnit struct {
 	Fullkey  string
 	Path     []string
@@ -22,7 +24,6 @@ func (t TranslationUnit) String() string {
 }
 
 func (t *TranslationUnit) EstimateTokenNumber() int {
-	TOKEN_PER_TEXT_SEGMENT_HEURISTIC := 4.0
 	estimateNumberOfTokens := 0
 	for _, segment := range t.Segments {
 		if segment.Type == TextSegment {
