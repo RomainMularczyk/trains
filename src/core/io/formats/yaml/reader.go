@@ -8,8 +8,9 @@ import (
 
 type YAMLReader struct{}
 
-func (r *YAMLReader) Read(path string, content any) error {
-	fileContent, err := os.ReadFile(path)
+func (r *YAMLReader) Read(path <-chan string, content any) error {
+	filePath := <-path
+	fileContent, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
