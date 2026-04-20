@@ -8,6 +8,7 @@ type Config struct {
 	Prompt      Prompt
 	Batching    Batching
 	IO          IO
+	Lock        Lock
 }
 
 type CLIOptions struct {
@@ -16,6 +17,7 @@ type CLIOptions struct {
 	Prompt      *PromptOverrides
 	Batching    *BatchingOverrides
 	IO          *IOOverrides
+	Lock        *LockOverrides
 }
 
 /*
