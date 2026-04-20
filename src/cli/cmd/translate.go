@@ -6,17 +6,20 @@ package cmd
 import (
 	"fmt"
 
-	"trains/src/core/io"
+	"trains/src/core/config"
+	"trains/src/core/config/types"
+	"trains/src/core/orchestration"
 
 	"github.com/spf13/cobra"
-	"trains/src/core/orchestration"
 )
 
 var (
 	readFormat     string
 	baseDir        string
+	configPath     string
 	sourceLanguage string
 	targetLanguage string
+	provider       string
 )
 
 // translateCmd represents the translate command
@@ -26,14 +29,16 @@ var translateCmd = &cobra.Command{
 	Long: `Translates input files from one format to another.
 Supports JSON input files with configurable parsing options.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fileFormat, err := io.FlagToFileFormat(readFormat)
+		fileFormat, err := types.FlagToFileFormat(readFormat)
+		provider, err := types.FlagToProvider(provider)
+		config := config.ResolveConfig(configPath)
 		if err != nil {
 			fmt.Errorf("Invalid file format: %v", err)
 			return
 		}
 
 		pipe := orchestration.Pipeline{}
-		pipe.Run(baseDir, fileFormat)
+		pipe.Run(baseDir, fileFormat, provider, config)
 	},
 }
 
@@ -65,6 +70,20 @@ func init() {
 		"t",
 		"fr,es",
 		"Target language",
+	)
+	translateCmd.Flags().StringVarP(
+		&provider,
+		"provider",
+		"p",
+		"openai",
+		"Provider",
+	)
+	translateCmd.Flags().StringVarP(
+		&configPath,
+		"config",
+		"c",
+		"",
+		"Configuration file",
 	)
 	rootCmd.AddCommand(translateCmd)
 
