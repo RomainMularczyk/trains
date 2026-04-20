@@ -1,6 +1,9 @@
-package translation
+package parser
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"trains/src/core/config/types"
+)
 
 type TranslationBatch struct {
 	Units       []TranslationUnit
@@ -19,15 +22,16 @@ func (b TranslationBatch) String() string {
 
 func CreateBatch(
 	translationUnit <-chan TranslationUnit,
-	translationBatches *[]TranslationBatch,
+	translationBatches chan<- TranslationBatch,
 	tokenLimit int,
+	config types.Config,
 ) {
 	batch := TranslationBatch{}
 
 	for unit := range translationUnit {
 		// if the batch is full, we send it to the output channel and create a new one
 		if batch.Size+batch.ContextSize > tokenLimit && len(batch.Units) > 0 {
-			*translationBatches = append(*translationBatches, batch)
+			translationBatches <- batch
 			batch = TranslationBatch{}
 		}
 		batch.Size += unit.EstimateTokenNumber()
@@ -35,6 +39,6 @@ func CreateBatch(
 	}
 
 	if len(batch.Units) > 0 {
-		*translationBatches = append(*translationBatches, batch)
+		translationBatches <- batch
 	}
 }

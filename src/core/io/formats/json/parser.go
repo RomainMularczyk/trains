@@ -4,14 +4,13 @@ import (
 	"strconv"
 	"strings"
 	"trains/src/core/parser"
-	"trains/src/core/translation"
 )
 
 type JSONParser struct{}
 
 func (p *JSONParser) Parse(
 	data <-chan any,
-	translationUnit chan<- translation.TranslationUnit,
+	translationUnit chan<- parser.TranslationUnit,
 ) {
 	fileContent := <-data
 	p.walk(fileContent, []string{}, translationUnit)
@@ -20,7 +19,7 @@ func (p *JSONParser) Parse(
 func (p *JSONParser) walk(
 	node any,
 	path []string,
-	translationUnit chan<- translation.TranslationUnit,
+	translationUnit chan<- parser.TranslationUnit,
 ) {
 	switch node.(type) {
 	// object case
@@ -38,7 +37,7 @@ func (p *JSONParser) walk(
 	case string:
 		fullKey := strings.Join(path, ".")
 
-		unit := translation.TranslationUnit{
+		unit := parser.TranslationUnit{
 			Fullkey:  fullKey,
 			Path:     append([]string{}, path...),
 			Source:   node.(string),

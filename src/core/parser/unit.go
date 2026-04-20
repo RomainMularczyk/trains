@@ -1,9 +1,8 @@
-package translation
+package parser
 
 import (
 	"encoding/json"
 	"math"
-	"trains/src/core/parser"
 )
 
 type TranslationUnit struct {
@@ -11,7 +10,7 @@ type TranslationUnit struct {
 	Path     []string
 	Source   string
 	Target   string
-	Segments []parser.Segment
+	Segments []Segment
 }
 
 func (t TranslationUnit) String() string {
@@ -26,12 +25,10 @@ func (t *TranslationUnit) EstimateTokenNumber() int {
 	TOKEN_PER_TEXT_SEGMENT_HEURISTIC := 4.0
 	estimateNumberOfTokens := 0
 	for _, segment := range t.Segments {
-		if segment.Type == parser.TextSegment {
+		if segment.Type == TextSegment {
 			estimateNumberOfTokens += int(math.Ceil(float64(len(segment.Value)) / TOKEN_PER_TEXT_SEGMENT_HEURISTIC))
 		}
 	}
 
 	return estimateNumberOfTokens
 }
-
-var translationUnitPool chan TranslationUnit = make(chan TranslationUnit, 500)
