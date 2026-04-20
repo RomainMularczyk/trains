@@ -6,21 +6,35 @@ import (
 
 func TestReadEmptyJson(t *testing.T) {
 	reader := JSONReader{}
-	var result map[string]interface{}
+	pathChan := make(chan string, 1)
+	contentChan := make(chan any, 1)
 
-	err := reader.Read("../../../../../tests/empty.json", &result)
-	if err == nil {
-		t.Error("Expected an error if JSON file is empty")
-		return
+	pathChan <- "../../../../../tests/empty.json"
+	close(pathChan)
+
+	reader.Read(pathChan, contentChan)
+	close(contentChan)
+
+	// With current implementation, empty/invalid JSON files are skipped
+	// So we just verify no panic occurs
+	for range contentChan {
+		t.Error("Expected no content for empty JSON file")
 	}
 }
 
 func TestReadSimpleJson(t *testing.T) {
 	reader := JSONReader{}
-	var result map[string]interface{}
+	pathChan := make(chan string, 1)
+	contentChan := make(chan any, 1)
 
-	err := reader.Read("../../../../../tests/simple.json", &result)
-	if err != nil {
-		t.Errorf("Error reading simple.json: %v", err)
+	pathChan <- "../../../../../tests/simple.json"
+	close(pathChan)
+
+	reader.Read(pathChan, contentChan)
+	close(contentChan)
+
+	result := <-contentChan
+	if result == nil {
+		t.Error("Expected non-nil result for valid JSON file")
 	}
 }
