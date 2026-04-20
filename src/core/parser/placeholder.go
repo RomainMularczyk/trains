@@ -11,8 +11,9 @@ type Placeholder struct {
 	PatternIndices []int
 }
 
+var pattern = regexp.MustCompile(`\{\{\s*([a-zA-Z0-9_]+)\s*\}\}`)
+
 func DetectPlaceholders(input string) []Placeholder {
-	pattern := regexp.MustCompile(`\{\{\s*([a-zA-Z0-9_]+)\s*\}\}`)
 	indices := pattern.FindAllStringSubmatchIndex(input, -1)
 
 	placeholders := make([]Placeholder, 0, len(indices))
