@@ -3,26 +3,40 @@ package orchestration
 import (
 	"fmt"
 	"sync"
+	"trains/src/core/config/types"
 	"trains/src/core/io"
+	"trains/src/core/parser"
 	"trains/src/core/translation"
 )
 
 type Pipeline struct{}
 
-func (p *Pipeline) Run(root string, format io.FileFormat) {
+/*
+Run the translation pipeline.
+*/
+func (p *Pipeline) Run(
+	root string,
+	format types.FileFormat,
+	provider types.ProviderName,
+	config types.Config,
+) {
+	// Create channels
 	filePaths := make(chan string)
 	fileContents := make(chan any)
-	translationUnits := make(chan translation.TranslationUnit)
-	batches := make([]translation.TranslationBatch, 0)
+	translationUnits := make(chan parser.TranslationUnit)
+	batches := make(chan parser.TranslationBatch)
+	translations := make(chan string)
 
 	processor, err := io.Processor(format)
+	llm := translation.NewLLM(provider, config)
 	if err != nil {
+		// TODO: handle error
 		fmt.Println(err)
 		return
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(4)
+	wg.Add(5)
 
 	go func() {
 		defer wg.Done()
@@ -44,7 +58,20 @@ func (p *Pipeline) Run(root string, format io.FileFormat) {
 
 	go func() {
 		defer wg.Done()
-		translation.CreateBatch(translationUnits, &batches, 100)
+		defer close(batches)
+		parser.CreateBatch(translationUnits, batches, 100, config)
+	}()
+
+	go func() {
+		defer wg.Done()
+		defer close(translations)
+		llm.Translate(config, batches, translations)
+	}()
+
+	go func() {
+		for translation := range translations {
+			fmt.Println(translation)
+		}
 	}()
 
 	wg.Wait()
