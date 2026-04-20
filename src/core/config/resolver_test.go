@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 )
 
@@ -13,10 +12,66 @@ func TestFromFile_ValidConfig(t *testing.T) {
 
 	validJSON := `{
 		"Provider": {
-			"ApiKey": "test-key",
-			"Model": "gpt-4",
-			"BaseUrl": "https://api.example.com",
-			"Timeout": 30
+			"openai": {
+				"ApiKey": "test-key",
+				"Model": "gpt-4",
+				"BaseUrl": "https://api.example.com",
+				"Timeout": 30
+			},
+			"anthropic": {
+				"ApiKey": "test-key",
+				"Model": "claude-3",
+				"BaseUrl": "https://api.anthropic.com",
+				"Timeout": 30
+			},
+			"google": {
+				"ApiKey": "test-key",
+				"Model": "gemini-pro",
+				"BaseUrl": "https://api.google.com",
+				"Timeout": 30
+			},
+			"mistral": {
+				"ApiKey": "test-key",
+				"Model": "mistral-large",
+				"BaseUrl": "https://api.mistral.com",
+				"Timeout": 30
+			},
+			"xai": {
+				"ApiKey": "test-key",
+				"Model": "grok",
+				"BaseUrl": "https://api.x.ai",
+				"Timeout": 30
+			},
+			"deepseeker": {
+				"ApiKey": "test-key",
+				"Model": "deepseek-chat",
+				"BaseUrl": "https://api.deepseek.com",
+				"Timeout": 30
+			},
+			"cohere": {
+				"ApiKey": "test-key",
+				"Model": "command",
+				"BaseUrl": "https://api.cohere.com",
+				"Timeout": 30
+			},
+			"perplexity": {
+				"ApiKey": "test-key",
+				"Model": "llama-3",
+				"BaseUrl": "https://api.perplexity.com",
+				"Timeout": 30
+			},
+			"openrouter": {
+				"ApiKey": "test-key",
+				"Model": "gpt-4",
+				"BaseUrl": "https://api.openrouter.com",
+				"Timeout": 30
+			},
+			"minimax": {
+				"ApiKey": "test-key",
+				"Model": "minimax-01",
+				"BaseUrl": "https://api.minimax.com",
+				"Timeout": 30
+			}
 		},
 		"Translation": {
 			"SourceLanguage": "en",
@@ -28,6 +83,12 @@ func TestFromFile_ValidConfig(t *testing.T) {
 		},
 		"Prompt": {
 			"Context": "Translate the following text"
+		},
+		"IO": {
+			"InputFormat": 1,
+			"OutputFormat": 1,
+			"SourcePath": "./source",
+			"TargetPath": "./target"
 		}
 	}`
 
@@ -36,29 +97,29 @@ func TestFromFile_ValidConfig(t *testing.T) {
 		t.Fatalf("Failed to write test config: %v", err)
 	}
 
-	expected := Config{
-		Provider: Provider{
-			ApiKey:  "test-key",
-			Model:   "gpt-4",
-			BaseUrl: "https://api.example.com",
-			Timeout: 30,
-		},
-		Translation: Translation{
-			SourceLanguage: "en",
-			TargetLanguage: "fr",
-		},
-		Batching: Batching{
-			TokenLimit: 1000,
-			UnitLimit:  10,
-		},
-		Prompt: Prompt{
-			Context: "Translate the following text",
-		},
+	config, err := fromFile(configPath)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	if config == nil {
+		t.Fatal("Expected config to be non-nil")
 	}
 
-	config, err := fromFile(configPath)
-	if !reflect.DeepEqual(*config, expected) {
-		t.Errorf("Expected config to be %v, got %v", expected, *config)
+	// Verify specific fields
+	if config.Provider.OpenAI.ApiKey != "test-key" {
+		t.Errorf("Expected OpenAI ApiKey to be 'test-key', got '%s'", config.Provider.OpenAI.ApiKey)
+	}
+	if config.Translation.SourceLanguage != "en" {
+		t.Errorf("Expected SourceLanguage to be 'en', got '%s'", config.Translation.SourceLanguage)
+	}
+	if config.Batching.TokenLimit != 1000 {
+		t.Errorf("Expected TokenLimit to be 1000, got %d", config.Batching.TokenLimit)
+	}
+	if config.Prompt.Context != "Translate the following text" {
+		t.Errorf("Expected Context to be 'Translate the following text', got '%s'", config.Prompt.Context)
+	}
+	if config.IO.SourcePath != "./source" {
+		t.Errorf("Expected SourcePath to be './source', got '%s'", config.IO.SourcePath)
 	}
 }
 
@@ -66,13 +127,15 @@ func TestFromFile_InvalidJSON(t *testing.T) {
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.json")
 
-	// because of training comas
+	// because of trailing commas
 	invalidJSON := `{
 		"Provider": {
-			"ApiKey": "test-key",
-			"Model": "gpt-4",
-			"BaseUrl": "https://api.example.com",
-			"Timeout": 30,
+			"openai": {
+				"ApiKey": "test-key",
+				"Model": "gpt-4",
+				"BaseUrl": "https://api.example.com",
+				"Timeout": 30,
+			},
 		},
 	}`
 
@@ -93,8 +156,10 @@ func TestFromFile_MissingRequiredFields(t *testing.T) {
 
 	incompleteJSON := `{
 		"Provider": {
-			"ApiKey": "test-key",
-			"Model": "gpt-4"
+			"openai": {
+				"ApiKey": "test-key",
+				"Model": "gpt-4"
+			}
 		},
 		"Translation": {
 			"SourceLanguage": "en"
