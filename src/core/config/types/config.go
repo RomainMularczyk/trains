@@ -11,12 +11,13 @@ type RuntimeConfig struct {
 }
 
 type ConfigFile struct {
-	Provider    Providers
-	Translation Translation
-	Prompt      Prompt
 	Batching    Batching
+	Config      Config
 	IO          IO
 	Lock        Lock
+	Prompt      Prompt
+	Provider    Providers
+	Translation Translation
 }
 
 type CLIOptions struct {
@@ -26,6 +27,10 @@ type CLIOptions struct {
 	Batching    *BatchingOverrides
 	IO          *IOOverrides
 	Lock        *LockOverrides
+}
+
+type Config struct {
+	Path string
 }
 
 /*
