@@ -8,8 +8,9 @@ import (
 type Code string
 
 const (
-	InvalidConfigError Code = "INVALID_CONFIG"
-	InvalidLockError   Code = "INVALID_LOCK"
+	InvalidConfigError   Code = "INVALID_CONFIG"
+	InvalidLockError     Code = "INVALID_LOCK"
+	InvalidProviderError Code = "INVALID_PROVIDER"
 )
 
 type TrainsError struct {
