@@ -20,7 +20,7 @@ type ConfigFile struct {
 	Translation Translation
 }
 
-type CLIOptions struct {
+type ConfigFileOverrides struct {
 	Provider    *ProvidersOverrides
 	Translation *TranslationOverrides
 	Prompt      *PromptOverrides
