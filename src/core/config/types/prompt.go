@@ -8,6 +8,18 @@ type PromptOverrides struct {
 	Context *string
 }
 
+/*
+Applies the given prompt overrides to the prompt configuration.
+*/
+func (p *Prompt) Apply(o *PromptOverrides) {
+	if o == nil {
+		return
+	}
+	if o.Context != nil {
+		p.Context = *o.Context
+	}
+}
+
 var SYSTEM_PROMPT = `
 You are a deterministic translation engine.
 

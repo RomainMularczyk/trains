@@ -9,3 +9,18 @@ type LockOverrides struct {
 	Version *int
 	Path    *string
 }
+
+/*
+Applies the given lock overrides to the lock configuration.
+*/
+func (l *Lock) Apply(o *LockOverrides) {
+	if o == nil {
+		return
+	}
+	if o.Version != nil {
+		l.Version = *o.Version
+	}
+	if o.Path != nil {
+		l.Path = *o.Path
+	}
+}

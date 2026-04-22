@@ -60,6 +60,66 @@ type ProviderOverrides struct {
 	Timeout *int
 }
 
+/*
+Applies the given provider overrides to the provider configuration.
+*/
+func (p *Provider) Apply(o *ProviderOverrides) {
+	if o == nil {
+		return
+	}
+	if o.ApiKey != nil {
+		p.ApiKey = *o.ApiKey
+	}
+	if o.Model != nil {
+		p.Model = *o.Model
+	}
+	if o.BaseUrl != nil {
+		p.BaseUrl = *o.BaseUrl
+	}
+	if o.Timeout != nil {
+		p.Timeout = *o.Timeout
+	}
+}
+
+/*
+Applies the given providers overrides to the providers configuration.
+*/
+func (p *Providers) Apply(o *ProvidersOverrides) {
+	if o == nil {
+		return
+	}
+	if o.OpenAI != nil && p.OpenAI != nil {
+		p.OpenAI.Apply(o.OpenAI)
+	}
+	if o.Anthropic != nil && p.Anthropic != nil {
+		p.Anthropic.Apply(o.Anthropic)
+	}
+	if o.Google != nil && p.Google != nil {
+		p.Google.Apply(o.Google)
+	}
+	if o.Mistral != nil && p.Mistral != nil {
+		p.Mistral.Apply(o.Mistral)
+	}
+	if o.xAI != nil && p.xAI != nil {
+		p.xAI.Apply(o.xAI)
+	}
+	if o.DeepSeeker != nil && p.DeepSeeker != nil {
+		p.DeepSeeker.Apply(o.DeepSeeker)
+	}
+	if o.Cohere != nil && p.Cohere != nil {
+		p.Cohere.Apply(o.Cohere)
+	}
+	if o.Perplexity != nil && p.Perplexity != nil {
+		p.Perplexity.Apply(o.Perplexity)
+	}
+	if o.OpenRouter != nil && p.OpenRouter != nil {
+		p.OpenRouter.Apply(o.OpenRouter)
+	}
+	if o.MiniMax != nil && p.MiniMax != nil {
+		p.MiniMax.Apply(o.MiniMax)
+	}
+}
+
 func FlagToProvider(flag string) (ProviderName, error) {
 	switch flag {
 	case "openai":
