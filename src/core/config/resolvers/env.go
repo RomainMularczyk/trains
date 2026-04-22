@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	"trains/src/core/config/options"
+	configOptions "trains/src/core/config/options"
 	configTypes "trains/src/core/config/types"
 	"trains/src/core/errors"
 )
@@ -9,7 +9,7 @@ import (
 /*
 Resolves the configuration from environment variables.
 */
-func FromEnv(config configTypes.ConfigFile) (*configTypes.ConfigFile, *errors.TrainsError) {
+func FromEnv() (*configTypes.ConfigFile, *errors.TrainsError) {
 	batchingConfig, err := configOptions.BatchingFromEnv()
 	// TODO: should I let silently fail if env vars are not parsable ?
 	if err != nil {
@@ -19,22 +19,32 @@ func FromEnv(config configTypes.ConfigFile) (*configTypes.ConfigFile, *errors.Tr
 	if err != nil {
 		return nil, err
 	}
+	lockConfig, err := configOptions.LockFromEnv()
+	if err != nil {
+		return nil, err
+	}
 	promptConfig, err := configOptions.PromptFromEnv()
 	if err != nil {
 		return nil, err
 	}
-	providerConfig := configOptions.ProviderFromEnv()
+	providerConfig, err := configOptions.ProviderFromEnv()
 	if err != nil {
 		return nil, err
 	}
-	translationConfig := configOptions.TranslationFromEnv(config)
-
-	return configTypes.ConfigFile{
-		Batching:    batchingConfig,
-		IO:          ioConfig,
-		Lock:        config.Lock,
-		Prompt:      promptConfig,
-		Provider:    configTypes.Providers{},
-		Translation: translationConfig,
+	translationConfig, err := configOptions.TranslationFromEnv()
+	if err != nil {
+		return nil, err
 	}
+
+	// Create a new config with all env vars applied
+	newConfig := &configTypes.ConfigFile{
+		Batching:    *batchingConfig,
+		IO:          *ioConfig,
+		Lock:        *lockConfig,
+		Prompt:      *promptConfig,
+		Provider:    *providerConfig,
+		Translation: *translationConfig,
+	}
+
+	return newConfig, nil
 }
