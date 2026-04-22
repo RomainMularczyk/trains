@@ -4,8 +4,11 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
 	"os"
+	"trains/src/core/errors"
+
+	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -24,6 +27,7 @@ Supports JSON format with customizable parsing and writing options.`,
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
+		fmt.Println(errors.FormatError(err, false))
 		os.Exit(1)
 	}
 }
