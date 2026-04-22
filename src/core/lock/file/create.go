@@ -2,8 +2,8 @@ package lockFile
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
+	"trains/src/core/errors"
 	"trains/src/core/lock/types"
 )
 
@@ -31,16 +31,28 @@ func LoadOrCreate(path string) (file *lockTypes.LockFile, err error) {
 	if exists && accessible {
 		var fileContent lockTypes.LockFile
 		file, err := os.ReadFile(path)
-		if err == nil {
-			return nil, fmt.Errorf("Error when reading lock file")
+		if err != nil {
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidLockError,
+				Message: "Could not read the lock file",
+				Err:     err,
+			}
 		}
 		err = json.Unmarshal(file, &fileContent)
 		if err != nil {
-			return nil, fmt.Errorf("Error when parsing lock file")
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidLockError,
+				Message: "Could not parse the lock file",
+				Err:     err,
+			}
 		}
 		err = Validate(fileContent)
 		if err != nil {
-			return nil, fmt.Errorf("Error when validating lock file")
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidLockError,
+				Message: "Invalid lock file",
+				Err:     err,
+			}
 		}
 
 		return &fileContent, nil
@@ -49,7 +61,11 @@ func LoadOrCreate(path string) (file *lockTypes.LockFile, err error) {
 	if !exists {
 		_, err = os.Create(path)
 		if err != nil {
-			return nil, fmt.Errorf("Error when creating lock file")
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidLockError,
+				Message: "Could not create the lock file",
+				Err:     err,
+			}
 		}
 
 		return &lockTypes.LockFile{
@@ -58,5 +74,9 @@ func LoadOrCreate(path string) (file *lockTypes.LockFile, err error) {
 		}, nil
 	}
 
-	return nil, fmt.Errorf("Error when loading lock file")
+	return nil, &errors.TrainsError{
+		Code:    errors.InvalidLockError,
+		Message: "Could not access the lock file",
+		Err:     err,
+	}
 }
