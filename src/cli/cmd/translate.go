@@ -3,22 +3,20 @@ package cmd
 import (
 	"fmt"
 
-	"trains/src/core/config"
-	"trains/src/core/config/types"
+	"trains/src/core/config/resolvers"
 	"trains/src/core/orchestration"
 
 	"github.com/spf13/cobra"
+	cmdTypes "trains/src/cli/types"
 )
 
-var (
-	readFormat     string
-	baseDir        string
-	configPath     string
-	lockFilePath   string
-	sourceLanguage string
-	targetLanguage string
-	provider       string
-)
+var batchingOptions cmdTypes.BatchingOptions
+var configOptions cmdTypes.ConfigOptions
+var ioOptions cmdTypes.IOOptions
+var lockOptions cmdTypes.LockOptions
+var promptOptions cmdTypes.PromptOptions
+var providerOptions cmdTypes.ProviderOptions
+var translationOptions cmdTypes.TranslationOptions
 
 var translateCmd = &cobra.Command{
 	Use:   "translate",
@@ -26,81 +24,173 @@ var translateCmd = &cobra.Command{
 	Long: `Translates input files from one format to another.
 Supports JSON input files with configurable parsing options.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fileFormat, err := types.FlagToFileFormat(readFormat)
-		provider, err := types.FlagToProvider(provider)
-		if err != nil {
-			return fmt.Errorf("Invalid provider: %v", err)
+		cliConfigOptions := cmdTypes.CLIConfigOptions{
+			Batching:    batchingOptions,
+			Config:      configOptions,
+			IO:          ioOptions,
+			Lock:        lockOptions,
+			Prompt:      promptOptions,
+			Provider:    providerOptions,
+			Translation: translationOptions,
 		}
-		config, err := config.ResolveConfig(configPath, provider)
+		config, err := config.ResolveConfig(cliConfigOptions)
 		if err != nil {
 			return fmt.Errorf("Invalid file format: %v", err)
 		}
 
 		pipe := orchestration.Pipeline{}
-		pipe.Run(baseDir, fileFormat, *config)
+		pipe.Run(config)
 		return nil
 	},
 }
 
 func init() {
+	// --------------------------------------------
+	// ----------------- Batching -----------------
+	// --------------------------------------------
+	translateCmd.Flags().IntVarP(
+		&batchingOptions.TokenLimit,
+		"tokenLimit",
+		"bt",
+		resolvers.DefaultTokenLimit,
+		"Batching token limit",
+	)
+	translateCmd.Flags().IntVarP(
+		&batchingOptions.UnitLimit,
+		"unitLimit",
+		"bu",
+		resolvers.DefaultTranslationUnitLimit,
+		"Batching translation unit limit",
+	)
+
+	// ------------------------------------------
+	// ----------------- Config -----------------
+	// ------------------------------------------
 	translateCmd.Flags().StringVarP(
-		&readFormat,
-		"format",
-		"f",
-		"json",
+		&configOptions.Path,
+		"config",
+		"c",
+		resolvers.DefaultConfigPath,
+		"Configuration file path",
+	)
+
+	// --------------------------------------
+	// ----------------- IO -----------------
+	// --------------------------------------
+	translateCmd.Flags().StringVarP(
+		&ioOptions.InputFormat,
+		"inputFormat",
+		"i",
+		string(resolvers.DefaultInputFormat),
 		"Input file format",
 	)
 	translateCmd.Flags().StringVarP(
-		&baseDir,
-		"input",
-		"i",
-		".",
-		"Input directory",
+		&ioOptions.OutputFormat,
+		"outputFormat",
+		"o",
+		string(resolvers.DefaultOutputFormat),
+		"Output file format",
 	)
 	translateCmd.Flags().StringVarP(
-		&sourceLanguage,
-		"srcLang",
+		&ioOptions.SourcePath,
+		"sourcePath",
 		"s",
+		resolvers.DefaultSourcePath,
+		"Source path",
+	)
+	translateCmd.Flags().StringVarP(
+		&ioOptions.TargetPath,
+		"targetPath",
+		"t",
+		resolvers.DefaultTargetPath,
+		"Target path",
+	)
+
+	// ----------------------------------------
+	// ----------------- Lock -----------------
+	// ----------------------------------------
+	translateCmd.Flags().StringVarP(
+		&lockOptions.Path,
+		"lockPath",
+		"l",
+		resolvers.DefaultLockPath,
+		"Lock path",
+	)
+	translateCmd.Flags().IntVarP(
+		&lockOptions.Version,
+		"lockVersion",
+		"ve",
+		resolvers.DefaultLockVersion,
+		"Lock version",
+	)
+
+	// --------------------------------------------
+	// ----------------- Provider -----------------
+	// --------------------------------------------
+	translateCmd.Flags().IntVarP(
+		&providerOptions.Timeout,
+		"timeout",
+		"to",
+		resolvers.DefaultProviderTimeout,
+		"Provider timeout",
+	)
+	translateCmd.Flags().StringVarP(
+		&providerOptions.ApiKey,
+		"apiKey",
+		"pk",
+		resolvers.DefaultProviderApiKey,
+		"Provider API key",
+	)
+	translateCmd.Flags().StringVarP(
+		&providerOptions.Model,
+		"model",
+		"pm",
+		resolvers.DefaultProviderModel,
+		"Provider model",
+	)
+	translateCmd.Flags().StringVarP(
+		&providerOptions.BaseUrl,
+		"baseUrl",
+		"pu",
+		resolvers.DefaultProviderBaseUrl,
+		"Provider base URL",
+	)
+	translateCmd.Flags().StringVarP(
+		&providerOptions.Name,
+		"provider",
+		"p",
+		string(resolvers.DefaultProviderName),
+		"Provider name",
+	)
+
+	// ------------------------------------------
+	// ----------------- Prompt -----------------
+	// ------------------------------------------
+	translateCmd.Flags().StringVarP(
+		&promptOptions.Context,
+		"context",
+		"ctx",
+		resolvers.DefaultPromptContext,
+		"Prompt context",
+	)
+
+	// -----------------------------------------------
+	// ----------------- Translation -----------------
+	// -----------------------------------------------
+	translateCmd.Flags().StringVarP(
+		&translationOptions.SourceLanguage,
+		"srcLang",
+		"sl",
 		"en",
 		"Source language",
 	)
 	translateCmd.Flags().StringVarP(
-		&targetLanguage,
+		&translationOptions.TargetLanguage,
 		"targetLang",
-		"t",
-		"fr,es",
+		"tl",
+		"fr",
 		"Target language",
 	)
-	translateCmd.Flags().StringVarP(
-		&provider,
-		"provider",
-		"p",
-		"openai",
-		"Provider",
-	)
-	translateCmd.Flags().StringVarP(
-		&configPath,
-		"config",
-		"c",
-		"trains.json",
-		"Configuration file",
-	)
-	translateCmd.Flags().StringVarP(
-		&lockFilePath,
-		"lockFile",
-		"l",
-		"trains-lock.json",
-		"Lock file",
-	)
+
 	rootCmd.AddCommand(translateCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// translateCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// translateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
