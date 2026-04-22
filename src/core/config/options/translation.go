@@ -3,24 +3,73 @@ package configOptions
 import (
 	"fmt"
 	"os"
+	cmdTypes "trains/src/cli/types"
 	configTypes "trains/src/core/config/types"
+	"trains/src/core/errors"
 )
 
-func TranslationFromEnv(config *configTypes.ConfigFile) {
+/*
+Resolves the translation configuration from command line options.
+*/
+func TranslationFromOptions(
+	cliConfigOptions cmdTypes.CLIConfigOptions,
+) (*configTypes.Translation, *errors.TrainsError) {
+	config := configTypes.Translation{}
+
+	if cliConfigOptions.Translation.SourceLanguage != "" {
+		srcLang, err := configTypes.GetLanguage(cliConfigOptions.Translation.SourceLanguage)
+		if err != nil {
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid source language",
+				Err:     err,
+			}
+		}
+		config.SourceLanguage = srcLang
+	}
+
+	if cliConfigOptions.Translation.TargetLanguage != "" {
+		targetLang, err := configTypes.GetLanguage(cliConfigOptions.Translation.TargetLanguage)
+		if err != nil {
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid target language",
+				Err:     err,
+			}
+		}
+		config.TargetLanguage = targetLang
+	}
+
+	return &config, nil
+}
+
+/*
+Resolves the translation configuration from environment variables.
+*/
+func TranslationFromEnv() (*configTypes.Translation, *errors.TrainsError) {
+	config := configTypes.Translation{}
 	if v := os.Getenv("TRAINS_TRANSLATION_SOURCE_LANGUAGE"); v != "" {
 		srcLang, err := configTypes.GetLanguage(v)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid source language",
+				Err:     err,
+			}
 		}
-		config.Translation.SourceLanguage = srcLang
+		config.SourceLanguage = srcLang
 	}
 	if v := os.Getenv("TRAINS_TRANSLATION_TARGET_LANGUAGE"); v != "" {
 		targetLang, err := configTypes.GetLanguage(v)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid target language",
+				Err:     err,
+			}
 		}
-		config.Translation.TargetLanguage = targetLang
+		config.TargetLanguage = targetLang
 	}
+
+	return &config, nil
 }
