@@ -52,3 +52,15 @@ func BatchingFromEnv() (*configTypes.BatchingOverrides, *errors.TrainsError) {
 
 	return &config, nil
 }
+
+/*
+Merges the batching configuration with the given overrides.
+*/
+func MergeBatchingConfig(dest *configTypes.Batching, overrides *configTypes.BatchingOverrides) {
+	if overrides.TokenLimit != nil {
+		dest.TokenLimit = *overrides.TokenLimit
+	}
+	if overrides.UnitLimit != nil {
+		dest.UnitLimit = *overrides.UnitLimit
+	}
+}

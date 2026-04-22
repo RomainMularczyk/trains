@@ -190,3 +190,60 @@ func MiniMaxFromEnv() *configTypes.ProviderOverrides {
 	}
 	return provider
 }
+
+/*
+Merges the provider configuration with the given overrides.
+*/
+func MergeProviderConfig(dest *configTypes.Provider, overrides *configTypes.ProviderOverrides) {
+	if overrides.Name != nil {
+		dest.Name = *overrides.Name
+	}
+	if overrides.ApiKey != nil {
+		dest.ApiKey = *overrides.ApiKey
+	}
+	if overrides.Model != nil {
+		dest.Model = *overrides.Model
+	}
+	if overrides.BaseUrl != nil {
+		dest.BaseUrl = *overrides.BaseUrl
+	}
+	if overrides.Timeout != nil {
+		dest.Timeout = *overrides.Timeout
+	}
+}
+
+/*
+Merges the providers configuration with the given overrides.
+*/
+func MergeProvidersConfig(dest *configTypes.Providers, overrides *configTypes.ProvidersOverrides) {
+	if overrides.OpenAI != nil && dest.OpenAI != nil {
+		MergeProviderConfig(dest.OpenAI, overrides.OpenAI)
+	}
+	if overrides.Anthropic != nil && dest.Anthropic != nil {
+		MergeProviderConfig(dest.Anthropic, overrides.Anthropic)
+	}
+	if overrides.Google != nil && dest.Google != nil {
+		MergeProviderConfig(dest.Google, overrides.Google)
+	}
+	if overrides.Mistral != nil && dest.Mistral != nil {
+		MergeProviderConfig(dest.Mistral, overrides.Mistral)
+	}
+	if overrides.XAI != nil && dest.XAI != nil {
+		MergeProviderConfig(dest.XAI, overrides.XAI)
+	}
+	if overrides.DeepSeeker != nil && dest.DeepSeeker != nil {
+		MergeProviderConfig(dest.DeepSeeker, overrides.DeepSeeker)
+	}
+	if overrides.Cohere != nil && dest.Cohere != nil {
+		MergeProviderConfig(dest.Cohere, overrides.Cohere)
+	}
+	if overrides.Perplexity != nil && dest.Perplexity != nil {
+		MergeProviderConfig(dest.Perplexity, overrides.Perplexity)
+	}
+	if overrides.OpenRouter != nil && dest.OpenRouter != nil {
+		MergeProviderConfig(dest.OpenRouter, overrides.OpenRouter)
+	}
+	if overrides.MiniMax != nil && dest.MiniMax != nil {
+		MergeProviderConfig(dest.MiniMax, overrides.MiniMax)
+	}
+}

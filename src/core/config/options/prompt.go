@@ -20,6 +20,15 @@ func PromptFromOptions(
 }
 
 /*
+Merges the prompt configuration with the given overrides.
+*/
+func MergePromptConfig(dest *configTypes.Prompt, overrides *configTypes.PromptOverrides) {
+	if overrides.Context != nil {
+		dest.Context = *overrides.Context
+	}
+}
+
+/*
 Resolves the prompt configuration from environment variables.
 */
 func PromptFromEnv() (*configTypes.PromptOverrides, *errors.TrainsError) {

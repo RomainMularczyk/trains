@@ -22,6 +22,18 @@ func LockFromOptions(
 }
 
 /*
+Merges the lock configuration with the given overrides.
+*/
+func MergeLockConfig(dest *configTypes.Lock, overrides *configTypes.LockOverrides) {
+	if overrides.Version != nil {
+		dest.Version = *overrides.Version
+	}
+	if overrides.Path != nil {
+		dest.Path = *overrides.Path
+	}
+}
+
+/*
 Resolves the lock configuration from environment variables.
 */
 func LockFromEnv() (*configTypes.LockOverrides, *errors.TrainsError) {

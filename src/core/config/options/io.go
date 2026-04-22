@@ -46,6 +46,24 @@ func IOFromOptions(
 }
 
 /*
+Merges the IO configuration with the given overrides.
+*/
+func MergeIOConfig(dest *configTypes.IO, overrides *configTypes.IOOverrides) {
+	if overrides.InputFormat != nil {
+		dest.InputFormat = *overrides.InputFormat
+	}
+	if overrides.OutputFormat != nil {
+		dest.OutputFormat = *overrides.OutputFormat
+	}
+	if overrides.SourcePath != nil {
+		dest.SourcePath = *overrides.SourcePath
+	}
+	if overrides.TargetPath != nil {
+		dest.TargetPath = *overrides.TargetPath
+	}
+}
+
+/*
 Resolves the IO configuration from environment variables.
 */
 func IOFromEnv() (*configTypes.IOOverrides, *errors.TrainsError) {

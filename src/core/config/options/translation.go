@@ -43,6 +43,18 @@ func TranslationFromOptions(
 }
 
 /*
+Merges the translation configuration with the given overrides.
+*/
+func MergeTranslationConfig(dest *configTypes.Translation, overrides *configTypes.TranslationOverrides) {
+	if overrides.SourceLanguage != nil {
+		dest.SourceLanguage = *overrides.SourceLanguage
+	}
+	if overrides.TargetLanguage != nil {
+		dest.TargetLanguage = *overrides.TargetLanguage
+	}
+}
+
+/*
 Resolves the translation configuration from environment variables.
 */
 func TranslationFromEnv() (*configTypes.TranslationOverrides, *errors.TrainsError) {
