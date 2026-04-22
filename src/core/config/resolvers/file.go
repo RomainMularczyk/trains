@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"trains/src/core/config/types"
+	configTypes "trains/src/core/config/types"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -17,7 +17,10 @@ var validate *validator.Validate
 /*
 Reads a JSON configuration file and returns a Config object.
 */
-func FromFile(path string) (*types.ConfigFile, error) {
+func FromFile(
+	path string,
+	config *configTypes.ConfigFile,
+) (*configTypes.ConfigFile, error) {
 	validate = validator.New()
 
 	fileContent, err := os.ReadFile(path)
@@ -25,12 +28,12 @@ func FromFile(path string) (*types.ConfigFile, error) {
 		return nil, err
 	}
 
-	var config types.ConfigFile
+	var configFile configTypes.ConfigFile
 	decoder := json.NewDecoder(bytes.NewReader(fileContent))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&config)
+	err = decoder.Decode(&configFile)
 	if err != nil {
-		return nil, fmt.Errorf("Error decoding config: %w", err)
+		return nil, err
 	}
 	err = json.Unmarshal(fileContent, &config)
 	if err != nil {
