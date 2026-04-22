@@ -32,7 +32,7 @@ const (
 /*
 Resolves the configuration from default values.
 */
-func FromDefaults() *configTypes.ConfigFile {
+func FromDefaults() configTypes.ConfigFile {
 	batching := configTypes.Batching{
 		TokenLimit: DefaultTokenLimit,
 		UnitLimit:  DefaultTranslationUnitLimit,
@@ -83,5 +83,5 @@ func FromDefaults() *configTypes.ConfigFile {
 		Translation: language,
 	}
 
-	return &configFile
+	return configFile
 }
