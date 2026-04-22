@@ -1,6 +1,8 @@
-package types
+package configTypes
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ProviderName string
 
@@ -44,10 +46,11 @@ type ProvidersOverrides struct {
 }
 
 type Provider struct {
-	ApiKey  string `validate:"required"`
-	Model   string `validate:"required"`
-	BaseUrl string `validate:"required"`
-	Timeout int    `validate:"required"`
+	Name    ProviderName `validate:"required"`
+	ApiKey  string       `validate:"required"`
+	Model   string       `validate:"required"`
+	BaseUrl string       `validate:"required"`
+	Timeout int          `validate:"required"`
 }
 
 type ProviderOverrides struct {
@@ -81,5 +84,35 @@ func FlagToProvider(flag string) (ProviderName, error) {
 		return MiniMax, nil
 	default:
 		return "", fmt.Errorf("Unsupported provider: %s", flag)
+	}
+}
+
+/*
+Returns the provider config for the given provider name.
+*/
+func ProviderNameToProviderConfig(name ProviderName, config ConfigFile) *Provider {
+	switch name {
+	case OpenAI:
+		return config.Provider.OpenAI
+	case Anthropic:
+		return config.Provider.Anthropic
+	case Google:
+		return config.Provider.Google
+	case Mistral:
+		return config.Provider.Mistral
+	case xAI:
+		return config.Provider.xAI
+	case DeepSeeker:
+		return config.Provider.DeepSeeker
+	case Cohere:
+		return config.Provider.Cohere
+	case Perplexity:
+		return config.Provider.Perplexity
+	case OpenRouter:
+		return config.Provider.OpenRouter
+	case MiniMax:
+		return config.Provider.MiniMax
+	default:
+		return config.Provider.OpenAI
 	}
 }
