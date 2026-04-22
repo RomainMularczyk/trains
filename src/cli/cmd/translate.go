@@ -1,6 +1,3 @@
-/*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -17,28 +14,31 @@ var (
 	readFormat     string
 	baseDir        string
 	configPath     string
+	lockFilePath   string
 	sourceLanguage string
 	targetLanguage string
 	provider       string
 )
 
-// translateCmd represents the translate command
 var translateCmd = &cobra.Command{
 	Use:   "translate",
 	Short: "A translation command",
 	Long: `Translates input files from one format to another.
 Supports JSON input files with configurable parsing options.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		fileFormat, err := types.FlagToFileFormat(readFormat)
 		provider, err := types.FlagToProvider(provider)
-		config := config.ResolveConfig(configPath)
 		if err != nil {
-			fmt.Errorf("Invalid file format: %v", err)
-			return
+			return fmt.Errorf("Invalid provider: %v", err)
+		}
+		config, err := config.ResolveConfig(configPath, provider)
+		if err != nil {
+			return fmt.Errorf("Invalid file format: %v", err)
 		}
 
 		pipe := orchestration.Pipeline{}
-		pipe.Run(baseDir, fileFormat, provider, config)
+		pipe.Run(baseDir, fileFormat, *config)
+		return nil
 	},
 }
 
@@ -82,8 +82,15 @@ func init() {
 		&configPath,
 		"config",
 		"c",
-		"",
+		"trains.json",
 		"Configuration file",
+	)
+	translateCmd.Flags().StringVarP(
+		&lockFilePath,
+		"lockFile",
+		"l",
+		"trains-lock.json",
+		"Lock file",
 	)
 	rootCmd.AddCommand(translateCmd)
 
