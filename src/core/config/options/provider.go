@@ -3,87 +3,159 @@ package configOptions
 import (
 	"os"
 	"strconv"
-	"trains/src/core/config/types"
+	configTypes "trains/src/core/config/types"
+	"trains/src/core/errors"
 )
 
 /*
 Resolves the provider configuration from command line options.
 */
-func ProviderFromOptions(provider types.ProviderName, config *types.ConfigFile) {
+func ProviderFromOptions(provider configTypes.ProviderName, config *configTypes.ConfigFile) {
 
 }
 
-func ProviderFromEnv(config *types.ConfigFile) {
-	OpenAIFromEnv(config)
-	AnthropicFromEnv(config)
-	GoogleFromEnv(config)
-	MistralFromEnv(config)
+/*
+Resolves the provider configuration from environment variables.
+*/
+func ProviderFromEnv() (*configTypes.Providers, *errors.TrainsError) {
+	providers := configTypes.Providers{}
+
+	if openAI := OpenAIFromEnv(); openAI != nil {
+		providers.OpenAI = openAI
+	}
+	if anthropic := AnthropicFromEnv(); anthropic != nil {
+		providers.Anthropic = anthropic
+	}
+	if google := GoogleFromEnv(); google != nil {
+		providers.Google = google
+	}
+	if mistral := MistralFromEnv(); mistral != nil {
+		providers.Mistral = mistral
+	}
+	if xAI := XAIFromEnv(); xAI != nil {
+		providers.XAI = xAI
+	}
+	if deepSeeker := DeepSeekerFromEnv(); deepSeeker != nil {
+		providers.DeepSeeker = deepSeeker
+	}
+	if cohere := CohereFromEnv(); cohere != nil {
+		providers.Cohere = cohere
+	}
+	if perplexity := PerplexityFromEnv(); perplexity != nil {
+		providers.Perplexity = perplexity
+	}
+	if openRouter := OpenRouterFromEnv(); openRouter != nil {
+		providers.OpenRouter = openRouter
+	}
+	if miniMax := MiniMaxFromEnv(); miniMax != nil {
+		providers.MiniMax = miniMax
+	}
+
+	return &providers, nil
 }
 
-func OpenAIFromEnv(config *types.ConfigFile) {
-	if v := os.Getenv("TRAINS_PROVIDER_OPENAI_API_KEY"); v != "" {
-		config.Provider.OpenAI.ApiKey = v
+func providerFromEnv(prefix string) *configTypes.Provider {
+	apiKey := os.Getenv(prefix + "_API_KEY")
+	if apiKey == "" {
+		return nil
 	}
-	if v := os.Getenv("TRAINS_PROVIDER_OPENAI_MODEL"); v != "" {
-		config.Provider.OpenAI.Model = v
+
+	provider := configTypes.Provider{
+		Name:   configTypes.ProviderName(""),
+		ApiKey: apiKey,
 	}
-	if v := os.Getenv("TRAINS_PROVIDER_OPENAI_BASE_URL"); v != "" {
-		config.Provider.OpenAI.BaseUrl = v
+
+	if v := os.Getenv(prefix + "_MODEL"); v != "" {
+		provider.Model = v
 	}
-	if v := os.Getenv("TRAINS_PROVIDER_OPENAI_TIMEOUT"); v != "" {
+	if v := os.Getenv(prefix + "_BASE_URL"); v != "" {
+		provider.BaseUrl = v
+	}
+	if v := os.Getenv(prefix + "_TIMEOUT"); v != "" {
 		if timeout, err := strconv.Atoi(v); err == nil {
-			config.Provider.OpenAI.Timeout = timeout
+			provider.Timeout = timeout
 		}
 	}
+
+	return &provider
 }
 
-func AnthropicFromEnv(config *types.ConfigFile) {
-	if v := os.Getenv("TRAINS_PROVIDER_ANTHROPIC_API_KEY"); v != "" {
-		config.Provider.Anthropic.ApiKey = v
+func OpenAIFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_OPENAI")
+	if provider != nil {
+		provider.Name = configTypes.OpenAI
 	}
-	if v := os.Getenv("TRAINS_PROVIDER_ANTHROPIC_MODEL"); v != "" {
-		config.Provider.Anthropic.Model = v
-	}
-	if v := os.Getenv("TRAINS_PROVIDER_ANTHROPIC_BASE_URL"); v != "" {
-		config.Provider.Anthropic.BaseUrl = v
-	}
-	if v := os.Getenv("TRAINS_PROVIDER_ANTHROPIC_TIMEOUT"); v != "" {
-		if timeout, err := strconv.Atoi(v); err == nil {
-			config.Provider.Anthropic.Timeout = timeout
-		}
-	}
+	return provider
 }
 
-func GoogleFromEnv(config *types.ConfigFile) {
-	if v := os.Getenv("TRAINS_PROVIDER_GOOGLE_API_KEY"); v != "" {
-		config.Provider.Google.ApiKey = v
+func AnthropicFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_ANTHROPIC")
+	if provider != nil {
+		provider.Name = configTypes.Anthropic
 	}
-	if v := os.Getenv("TRAINS_PROVIDER_GOOGLE_MODEL"); v != "" {
-		config.Provider.Google.Model = v
-	}
-	if v := os.Getenv("TRAINS_PROVIDER_GOOGLE_BASE_URL"); v != "" {
-		config.Provider.Google.BaseUrl = v
-	}
-	if v := os.Getenv("TRAINS_PROVIDER_GOOGLE_TIMEOUT"); v != "" {
-		if timeout, err := strconv.Atoi(v); err == nil {
-			config.Provider.Google.Timeout = timeout
-		}
-	}
+	return provider
 }
 
-func MistralFromEnv(config *types.ConfigFile) {
-	if v := os.Getenv("TRAINS_PROVIDER_MISTRAL_API_KEY"); v != "" {
-		config.Provider.Mistral.ApiKey = v
+func GoogleFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_GOOGLE")
+	if provider != nil {
+		provider.Name = configTypes.Google
 	}
-	if v := os.Getenv("TRAINS_PROVIDER_MISTRAL_MODEL"); v != "" {
-		config.Provider.Mistral.Model = v
+	return provider
+}
+
+func MistralFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_MISTRAL")
+	if provider != nil {
+		provider.Name = configTypes.Mistral
 	}
-	if v := os.Getenv("TRAINS_PROVIDER_MISTRAL_BASE_URL"); v != "" {
-		config.Provider.Mistral.BaseUrl = v
+	return provider
+}
+
+func XAIFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_XAI")
+	if provider != nil {
+		provider.Name = configTypes.XAI
 	}
-	if v := os.Getenv("TRAINS_PROVIDER_MISTRAL_TIMEOUT"); v != "" {
-		if timeout, err := strconv.Atoi(v); err == nil {
-			config.Provider.Mistral.Timeout = timeout
-		}
+	return provider
+}
+
+func DeepSeekerFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_DEEPSEEKER")
+	if provider != nil {
+		provider.Name = configTypes.DeepSeeker
 	}
+	return provider
+}
+
+func CohereFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_COHERE")
+	if provider != nil {
+		provider.Name = configTypes.Cohere
+	}
+	return provider
+}
+
+func PerplexityFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_PERPLEXITY")
+	if provider != nil {
+		provider.Name = configTypes.Perplexity
+	}
+	return provider
+}
+
+func OpenRouterFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_OPENROUTER")
+	if provider != nil {
+		provider.Name = configTypes.OpenRouter
+	}
+	return provider
+}
+
+func MiniMaxFromEnv() *configTypes.Provider {
+	provider := providerFromEnv("TRAINS_PROVIDER_MINIMAX")
+	if provider != nil {
+		provider.Name = configTypes.MiniMax
+	}
+	return provider
 }

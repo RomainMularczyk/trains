@@ -1,33 +1,45 @@
 package configOptions
 
 import (
-	"fmt"
 	"os"
 	configTypes "trains/src/core/config/types"
+	"trains/src/core/errors"
 )
 
-func IOFromEnv(config *configTypes.ConfigFile) {
-	// IO
+/*
+Resolves the IO configuration from environment variables.
+*/
+func IOFromEnv() (*configTypes.IO, *errors.TrainsError) {
+	config := configTypes.IO{}
 	if v := os.Getenv("TRAINS_IO_INPUT_FORMAT"); v != "" {
+		// TODO: add suggestions of the different formats available
 		fileFormat, err := configTypes.FlagToFileFormat(v)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid IO input format",
+				Err:     err,
+			}
 		}
-		config.IO.InputFormat = configTypes.FileFormat(fileFormat)
+		config.InputFormat = configTypes.FileFormat(fileFormat)
 	}
 	if v := os.Getenv("TRAINS_IO_OUTPUT_FORMAT"); v != "" {
 		fileFormat, err := configTypes.FlagToFileFormat(v)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid IO output format",
+				Err:     err,
+			}
 		}
-		config.IO.OutputFormat = configTypes.FileFormat(fileFormat)
+		config.OutputFormat = configTypes.FileFormat(fileFormat)
 	}
 	if v := os.Getenv("TRAINS_IO_SOURCE_PATH"); v != "" {
-		config.IO.SourcePath = v
+		config.SourcePath = v
 	}
 	if v := os.Getenv("TRAINS_IO_TARGET_PATH"); v != "" {
-		config.IO.TargetPath = v
+		config.TargetPath = v
 	}
+
+	return &config, nil
 }

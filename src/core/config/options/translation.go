@@ -3,12 +3,12 @@ package configOptions
 import (
 	"fmt"
 	"os"
-	"trains/src/core/config/types"
+	configTypes "trains/src/core/config/types"
 )
 
-func TranslationFromEnv(config *types.ConfigFile) {
+func TranslationFromEnv(config *configTypes.ConfigFile) {
 	if v := os.Getenv("TRAINS_TRANSLATION_SOURCE_LANGUAGE"); v != "" {
-		srcLang, err := types.GetLanguage(v)
+		srcLang, err := configTypes.GetLanguage(v)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -16,7 +16,7 @@ func TranslationFromEnv(config *types.ConfigFile) {
 		config.Translation.SourceLanguage = srcLang
 	}
 	if v := os.Getenv("TRAINS_TRANSLATION_TARGET_LANGUAGE"); v != "" {
-		targetLang, err := types.GetLanguage(v)
+		targetLang, err := configTypes.GetLanguage(v)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
