@@ -11,7 +11,7 @@ const (
 	Anthropic  ProviderName = "anthropic"
 	Google     ProviderName = "google"
 	Mistral    ProviderName = "mistral"
-	xAI        ProviderName = "xai"
+	XAI        ProviderName = "xai"
 	DeepSeeker ProviderName = "deepseeker"
 	Cohere     ProviderName = "cohere"
 	Perplexity ProviderName = "perplexity"
@@ -24,7 +24,7 @@ type Providers struct {
 	Anthropic  *Provider `json:"anthropic"`
 	Google     *Provider `json:"google"`
 	Mistral    *Provider `json:"mistral"`
-	xAI        *Provider `json:"xai"`
+	XAI        *Provider `json:"xai"`
 	DeepSeeker *Provider `json:"deepseeker"`
 	Cohere     *Provider `json:"cohere"`
 	Perplexity *Provider `json:"perplexity"`
@@ -37,7 +37,7 @@ type ProvidersOverrides struct {
 	Anthropic  *ProviderOverrides
 	Google     *ProviderOverrides
 	Mistral    *ProviderOverrides
-	xAI        *ProviderOverrides
+	XAI        *ProviderOverrides
 	DeepSeeker *ProviderOverrides
 	Cohere     *ProviderOverrides
 	Perplexity *ProviderOverrides
@@ -100,8 +100,8 @@ func (p *Providers) Apply(o *ProvidersOverrides) {
 	if o.Mistral != nil && p.Mistral != nil {
 		p.Mistral.Apply(o.Mistral)
 	}
-	if o.xAI != nil && p.xAI != nil {
-		p.xAI.Apply(o.xAI)
+	if o.XAI != nil && p.XAI != nil {
+		p.XAI.Apply(o.XAI)
 	}
 	if o.DeepSeeker != nil && p.DeepSeeker != nil {
 		p.DeepSeeker.Apply(o.DeepSeeker)
@@ -131,7 +131,7 @@ func FlagToProvider(flag string) (ProviderName, error) {
 	case "mistral":
 		return Mistral, nil
 	case "xai":
-		return xAI, nil
+		return XAI, nil
 	case "deepseeker":
 		return DeepSeeker, nil
 	case "cohere":
@@ -160,8 +160,8 @@ func ProviderNameToProviderConfig(name ProviderName, config ConfigFile) *Provide
 		return config.Provider.Google
 	case Mistral:
 		return config.Provider.Mistral
-	case xAI:
-		return config.Provider.xAI
+	case XAI:
+		return config.Provider.XAI
 	case DeepSeeker:
 		return config.Provider.DeepSeeker
 	case Cohere:
