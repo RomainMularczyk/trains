@@ -2,7 +2,7 @@ package parser
 
 import (
 	"encoding/json"
-	"trains/src/core/config/types"
+	configTypes "trains/src/core/config/types"
 )
 
 type TranslationBatch struct {
@@ -24,7 +24,7 @@ func CreateBatch(
 	translationUnit <-chan TranslationUnit,
 	translationBatches chan<- TranslationBatch,
 	tokenLimit int,
-	config types.RuntimeConfig,
+	config configTypes.RuntimeConfig,
 ) {
 	batch := TranslationBatch{}
 
