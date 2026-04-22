@@ -6,14 +6,21 @@ import (
 	"trains/src/core/config/types"
 )
 
-func ProviderFromEnv(config *types.Config) {
+/*
+Resolves the provider configuration from command line options.
+*/
+func ProviderFromOptions(provider types.ProviderName, config *types.ConfigFile) {
+
+}
+
+func ProviderFromEnv(config *types.ConfigFile) {
 	OpenAIFromEnv(config)
 	AnthropicFromEnv(config)
 	GoogleFromEnv(config)
 	MistralFromEnv(config)
 }
 
-func OpenAIFromEnv(config *types.Config) {
+func OpenAIFromEnv(config *types.ConfigFile) {
 	if v := os.Getenv("TRAINS_PROVIDER_OPENAI_API_KEY"); v != "" {
 		config.Provider.OpenAI.ApiKey = v
 	}
@@ -30,7 +37,7 @@ func OpenAIFromEnv(config *types.Config) {
 	}
 }
 
-func AnthropicFromEnv(config *types.Config) {
+func AnthropicFromEnv(config *types.ConfigFile) {
 	if v := os.Getenv("TRAINS_PROVIDER_ANTHROPIC_API_KEY"); v != "" {
 		config.Provider.Anthropic.ApiKey = v
 	}
@@ -47,7 +54,7 @@ func AnthropicFromEnv(config *types.Config) {
 	}
 }
 
-func GoogleFromEnv(config *types.Config) {
+func GoogleFromEnv(config *types.ConfigFile) {
 	if v := os.Getenv("TRAINS_PROVIDER_GOOGLE_API_KEY"); v != "" {
 		config.Provider.Google.ApiKey = v
 	}
@@ -64,7 +71,7 @@ func GoogleFromEnv(config *types.Config) {
 	}
 }
 
-func MistralFromEnv(config *types.Config) {
+func MistralFromEnv(config *types.ConfigFile) {
 	if v := os.Getenv("TRAINS_PROVIDER_MISTRAL_API_KEY"); v != "" {
 		config.Provider.Mistral.ApiKey = v
 	}

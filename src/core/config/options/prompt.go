@@ -5,7 +5,7 @@ import (
 	"trains/src/core/config/types"
 )
 
-func PromptFromEnv(config *types.Config) {
+func PromptFromEnv(config *types.ConfigFile) {
 	// Prompt
 	if v := os.Getenv("TRAINS_PROMPT_CONTEXT"); v != "" {
 		config.Prompt.Context = v

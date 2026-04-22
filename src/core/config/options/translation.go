@@ -6,7 +6,7 @@ import (
 	"trains/src/core/config/types"
 )
 
-func TranslationFromEnv(config *types.Config) {
+func TranslationFromEnv(config *types.ConfigFile) {
 	if v := os.Getenv("TRAINS_TRANSLATION_SOURCE_LANGUAGE"); v != "" {
 		srcLang, err := types.GetLanguage(v)
 		if err != nil {

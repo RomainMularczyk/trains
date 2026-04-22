@@ -3,26 +3,26 @@ package configOptions
 import (
 	"fmt"
 	"os"
-	"trains/src/core/config/types"
+	configTypes "trains/src/core/config/types"
 )
 
-func IOFromEnv(config *types.Config) {
+func IOFromEnv(config *configTypes.ConfigFile) {
 	// IO
 	if v := os.Getenv("TRAINS_IO_INPUT_FORMAT"); v != "" {
-		fileFormat, err := types.FlagToFileFormat(v)
+		fileFormat, err := configTypes.FlagToFileFormat(v)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		config.IO.InputFormat = types.FileFormat(fileFormat)
+		config.IO.InputFormat = configTypes.FileFormat(fileFormat)
 	}
 	if v := os.Getenv("TRAINS_IO_OUTPUT_FORMAT"); v != "" {
-		fileFormat, err := types.FlagToFileFormat(v)
+		fileFormat, err := configTypes.FlagToFileFormat(v)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		config.IO.OutputFormat = types.FileFormat(fileFormat)
+		config.IO.OutputFormat = configTypes.FileFormat(fileFormat)
 	}
 	if v := os.Getenv("TRAINS_IO_SOURCE_PATH"); v != "" {
 		config.IO.SourcePath = v
