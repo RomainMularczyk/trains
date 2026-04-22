@@ -24,6 +24,7 @@ func CreateBatch(
 	translationUnit <-chan TranslationUnit,
 	translationBatches chan<- TranslationBatch,
 	tokenLimit int,
+	config types.RuntimeConfig,
 ) {
 	batch := TranslationBatch{}
 
