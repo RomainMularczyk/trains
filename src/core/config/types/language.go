@@ -3,6 +3,7 @@ package configTypes
 import (
 	"fmt"
 	"strings"
+	"trains/src/core/errors"
 )
 
 type Language string
@@ -101,10 +102,17 @@ var languages = map[string]Language{
 	"zu":  Zulu,
 }
 
-func GetLanguage(code string) (Language, error) {
+/*
+Returns the language for the given code.
+*/
+func GetLanguage(code string) (Language, *errors.TrainsError) {
 	lang, ok := languages[strings.ToLower(code)]
 	if !ok {
-		return "", fmt.Errorf("Unsupported language: %s", code)
+		return "", &errors.TrainsError{
+			Code:    errors.InvalidConfigError,
+			Message: "Unsupported language",
+			Err:     fmt.Errorf("Unsupported language: %s", code),
+		}
 	}
 	return lang, nil
 }
