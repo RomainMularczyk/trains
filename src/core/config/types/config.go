@@ -1,8 +1,16 @@
-package types
+package configTypes
 
-import "encoding/json"
+import (
+	"encoding/json"
+	lockTypes "trains/src/core/lock/types"
+)
 
-type Config struct {
+type RuntimeConfig struct {
+	SelectedProvider Provider
+	Locks            []lockTypes.LockFileEntry
+}
+
+type ConfigFile struct {
 	Provider    Providers
 	Translation Translation
 	Prompt      Prompt
@@ -21,9 +29,22 @@ type CLIOptions struct {
 }
 
 /*
+Creates a slice of lock file entries from the given lock file.
+*/
+func CreateLockFileEntries(lockFile lockTypes.LockFile) []lockTypes.LockFileEntry {
+	locks := make([]lockTypes.LockFileEntry, 0, len(lockFile.Entries))
+
+	for _, entry := range lockFile.Entries {
+		locks = append(locks, entry)
+	}
+
+	return locks
+}
+
+/*
 Format the configuration as a JSON string.
 */
-func (c Config) String() string {
+func (c ConfigFile) String() string {
 	config, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return "{}"
