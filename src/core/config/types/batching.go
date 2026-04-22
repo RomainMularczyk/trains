@@ -1,4 +1,4 @@
-package types
+package configTypes
 
 type Batching struct {
 	TokenLimit int

@@ -1,4 +1,4 @@
-package types
+package configTypes
 
 type Lock struct {
 	Version int

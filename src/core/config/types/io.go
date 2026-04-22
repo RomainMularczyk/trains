@@ -1,4 +1,4 @@
-package types
+package configTypes
 
 type IO struct {
 	InputFormat  FileFormat `validate:"required"`
