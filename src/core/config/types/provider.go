@@ -54,6 +54,7 @@ type Provider struct {
 }
 
 type ProviderOverrides struct {
+	Name    *ProviderName
 	ApiKey  *string
 	Model   *string
 	BaseUrl *string
