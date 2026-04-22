@@ -9,7 +9,7 @@ import (
 /*
 Resolves the configuration from environment variables.
 */
-func FromEnv() (*configTypes.ConfigFile, *errors.TrainsError) {
+func FromEnv() (*configTypes.ConfigFileOverrides, *errors.TrainsError) {
 	batchingConfig, err := configOptions.BatchingFromEnv()
 	// TODO: should I let silently fail if env vars are not parsable ?
 	if err != nil {
@@ -37,13 +37,13 @@ func FromEnv() (*configTypes.ConfigFile, *errors.TrainsError) {
 	}
 
 	// Create a new config with all env vars applied
-	newConfig := &configTypes.ConfigFile{
-		Batching:    *batchingConfig,
-		IO:          *ioConfig,
-		Lock:        *lockConfig,
-		Prompt:      *promptConfig,
-		Provider:    *providerConfig,
-		Translation: *translationConfig,
+	newConfig := &configTypes.ConfigFileOverrides{
+		Batching:    batchingConfig,
+		IO:          ioConfig,
+		Lock:        lockConfig,
+		Prompt:      promptConfig,
+		Provider:    providerConfig,
+		Translation: translationConfig,
 	}
 
 	return newConfig, nil

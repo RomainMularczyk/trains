@@ -13,8 +13,8 @@ Resolves the provider configuration from command line options.
 */
 func ProviderFromOptions(
 	cliConfigOptions cmdTypes.CLIConfigOptions,
-) (*configTypes.Provider, *errors.TrainsError) {
-	config := configTypes.Provider{}
+) (*configTypes.ProviderOverrides, *errors.TrainsError) {
+	config := configTypes.ProviderOverrides{}
 
 	if cliConfigOptions.Provider.Name != "" {
 		providerName, err := configTypes.FlagToProvider(cliConfigOptions.Provider.Name)
@@ -25,13 +25,13 @@ func ProviderFromOptions(
 				Err:     err,
 			}
 		}
-		config.Name = providerName
+		config.Name = &providerName
 	}
 
-	config.ApiKey = cliConfigOptions.Provider.ApiKey
-	config.Model = cliConfigOptions.Provider.Model
-	config.BaseUrl = cliConfigOptions.Provider.BaseUrl
-	config.Timeout = cliConfigOptions.Provider.Timeout
+	config.ApiKey = &cliConfigOptions.Provider.ApiKey
+	config.Model = &cliConfigOptions.Provider.Model
+	config.BaseUrl = &cliConfigOptions.Provider.BaseUrl
+	config.Timeout = &cliConfigOptions.Provider.Timeout
 
 	return &config, nil
 }
@@ -39,8 +39,8 @@ func ProviderFromOptions(
 /*
 Resolves the provider configuration from environment variables.
 */
-func ProviderFromEnv() (*configTypes.Providers, *errors.TrainsError) {
-	providers := configTypes.Providers{}
+func ProviderFromEnv() (*configTypes.ProvidersOverrides, *errors.TrainsError) {
+	providers := configTypes.ProvidersOverrides{}
 
 	if openAI := OpenAIFromEnv(); openAI != nil {
 		providers.OpenAI = openAI
@@ -76,108 +76,117 @@ func ProviderFromEnv() (*configTypes.Providers, *errors.TrainsError) {
 	return &providers, nil
 }
 
-func providerFromEnv(prefix string) *configTypes.Provider {
+func providerFromEnv(prefix string) *configTypes.ProviderOverrides {
 	apiKey := os.Getenv(prefix + "_API_KEY")
 	if apiKey == "" {
 		return nil
 	}
 
-	provider := configTypes.Provider{
-		Name:   configTypes.ProviderName(""),
-		ApiKey: apiKey,
+	provider := configTypes.ProviderOverrides{
+		ApiKey: &apiKey,
 	}
 
 	if v := os.Getenv(prefix + "_MODEL"); v != "" {
-		provider.Model = v
+		provider.Model = &v
 	}
 	if v := os.Getenv(prefix + "_BASE_URL"); v != "" {
-		provider.BaseUrl = v
+		provider.BaseUrl = &v
 	}
 	if v := os.Getenv(prefix + "_TIMEOUT"); v != "" {
 		if timeout, err := strconv.Atoi(v); err == nil {
-			provider.Timeout = timeout
+			provider.Timeout = &timeout
 		}
 	}
 
 	return &provider
 }
 
-func OpenAIFromEnv() *configTypes.Provider {
+func OpenAIFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_OPENAI")
+	providerName := configTypes.OpenAI
 	if provider != nil {
-		provider.Name = configTypes.OpenAI
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func AnthropicFromEnv() *configTypes.Provider {
+func AnthropicFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_ANTHROPIC")
+	providerName := configTypes.Anthropic
 	if provider != nil {
-		provider.Name = configTypes.Anthropic
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func GoogleFromEnv() *configTypes.Provider {
+func GoogleFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_GOOGLE")
+	providerName := configTypes.Google
 	if provider != nil {
-		provider.Name = configTypes.Google
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func MistralFromEnv() *configTypes.Provider {
+func MistralFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_MISTRAL")
+	providerName := configTypes.Mistral
 	if provider != nil {
-		provider.Name = configTypes.Mistral
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func XAIFromEnv() *configTypes.Provider {
+func XAIFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_XAI")
+	providerName := configTypes.XAI
 	if provider != nil {
-		provider.Name = configTypes.XAI
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func DeepSeekerFromEnv() *configTypes.Provider {
+func DeepSeekerFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_DEEPSEEKER")
+	providerName := configTypes.DeepSeeker
 	if provider != nil {
-		provider.Name = configTypes.DeepSeeker
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func CohereFromEnv() *configTypes.Provider {
+func CohereFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_COHERE")
+	providerName := configTypes.Cohere
 	if provider != nil {
-		provider.Name = configTypes.Cohere
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func PerplexityFromEnv() *configTypes.Provider {
+func PerplexityFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_PERPLEXITY")
+	providerName := configTypes.Perplexity
 	if provider != nil {
-		provider.Name = configTypes.Perplexity
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func OpenRouterFromEnv() *configTypes.Provider {
+func OpenRouterFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_OPENROUTER")
+	providerName := configTypes.OpenRouter
 	if provider != nil {
-		provider.Name = configTypes.OpenRouter
+		provider.Name = &providerName
 	}
 	return provider
 }
 
-func MiniMaxFromEnv() *configTypes.Provider {
+func MiniMaxFromEnv() *configTypes.ProviderOverrides {
 	provider := providerFromEnv("TRAINS_PROVIDER_MINIMAX")
+	providerName := configTypes.MiniMax
 	if provider != nil {
-		provider.Name = configTypes.MiniMax
+		provider.Name = &providerName
 	}
 	return provider
 }

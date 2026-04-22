@@ -48,8 +48,8 @@ func IOFromOptions(
 /*
 Resolves the IO configuration from environment variables.
 */
-func IOFromEnv() (*configTypes.IO, *errors.TrainsError) {
-	config := configTypes.IO{}
+func IOFromEnv() (*configTypes.IOOverrides, *errors.TrainsError) {
+	config := configTypes.IOOverrides{}
 	if v := os.Getenv("TRAINS_IO_INPUT_FORMAT"); v != "" {
 		// TODO: add suggestions of the different formats available
 		fileFormat, err := configTypes.FlagToFileFormat(v)
@@ -60,7 +60,7 @@ func IOFromEnv() (*configTypes.IO, *errors.TrainsError) {
 				Err:     err,
 			}
 		}
-		config.InputFormat = configTypes.FileFormat(fileFormat)
+		config.InputFormat = &fileFormat
 	}
 	if v := os.Getenv("TRAINS_IO_OUTPUT_FORMAT"); v != "" {
 		fileFormat, err := configTypes.FlagToFileFormat(v)
@@ -71,13 +71,13 @@ func IOFromEnv() (*configTypes.IO, *errors.TrainsError) {
 				Err:     err,
 			}
 		}
-		config.OutputFormat = configTypes.FileFormat(fileFormat)
+		config.OutputFormat = &fileFormat
 	}
 	if v := os.Getenv("TRAINS_IO_SOURCE_PATH"); v != "" {
-		config.SourcePath = v
+		config.SourcePath = &v
 	}
 	if v := os.Getenv("TRAINS_IO_TARGET_PATH"); v != "" {
-		config.TargetPath = v
+		config.TargetPath = &v
 	}
 
 	return &config, nil

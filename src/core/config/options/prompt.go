@@ -22,12 +22,12 @@ func PromptFromOptions(
 /*
 Resolves the prompt configuration from environment variables.
 */
-func PromptFromEnv() (*configTypes.Prompt, *errors.TrainsError) {
-	config := configTypes.Prompt{}
+func PromptFromEnv() (*configTypes.PromptOverrides, *errors.TrainsError) {
+	config := configTypes.PromptOverrides{}
 
 	// Prompt
 	if v := os.Getenv("TRAINS_PROMPT_CONTEXT"); v != "" {
-		config.Context = v
+		config.Context = &v
 	}
 
 	return &config, nil

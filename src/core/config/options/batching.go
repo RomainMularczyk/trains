@@ -24,8 +24,8 @@ func BatchingFromOptions(
 /*
 Resolves the batching configuration from environment variables.
 */
-func BatchingFromEnv() (*configTypes.Batching, *errors.TrainsError) {
-	config := configTypes.Batching{}
+func BatchingFromEnv() (*configTypes.BatchingOverrides, *errors.TrainsError) {
+	config := configTypes.BatchingOverrides{}
 	if v := os.Getenv("TRAINS_BATCHING_TOKEN_LIMIT"); v != "" {
 		tokenLimit, err := strconv.Atoi(v)
 		if err != nil {
@@ -35,7 +35,7 @@ func BatchingFromEnv() (*configTypes.Batching, *errors.TrainsError) {
 				Err:     err,
 			}
 		}
-		config.TokenLimit = tokenLimit
+		config.TokenLimit = &tokenLimit
 	}
 
 	if v := os.Getenv("TRAINS_BATCHING_UNIT_LIMIT"); v != "" {
@@ -47,7 +47,7 @@ func BatchingFromEnv() (*configTypes.Batching, *errors.TrainsError) {
 				Err:     err,
 			}
 		}
-		config.UnitLimit = unitLimit
+		config.UnitLimit = &unitLimit
 	}
 
 	return &config, nil

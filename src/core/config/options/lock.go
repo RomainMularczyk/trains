@@ -24,8 +24,8 @@ func LockFromOptions(
 /*
 Resolves the lock configuration from environment variables.
 */
-func LockFromEnv() (*configTypes.Lock, *errors.TrainsError) {
-	config := configTypes.Lock{}
+func LockFromEnv() (*configTypes.LockOverrides, *errors.TrainsError) {
+	config := configTypes.LockOverrides{}
 	if v := os.Getenv("TRAINS_LOCK_VERSION"); v != "" {
 		version, err := strconv.Atoi(v)
 		if err != nil {
@@ -35,10 +35,10 @@ func LockFromEnv() (*configTypes.Lock, *errors.TrainsError) {
 				Err:     err,
 			}
 		}
-		config.Version = version
+		config.Version = &version
 	}
 	if v := os.Getenv("TRAINS_LOCK_PATH"); v != "" {
-		config.Path = v
+		config.Path = &v
 	}
 	return &config, nil
 }

@@ -45,8 +45,8 @@ func TranslationFromOptions(
 /*
 Resolves the translation configuration from environment variables.
 */
-func TranslationFromEnv() (*configTypes.Translation, *errors.TrainsError) {
-	config := configTypes.Translation{}
+func TranslationFromEnv() (*configTypes.TranslationOverrides, *errors.TrainsError) {
+	config := configTypes.TranslationOverrides{}
 	if v := os.Getenv("TRAINS_TRANSLATION_SOURCE_LANGUAGE"); v != "" {
 		srcLang, err := configTypes.GetLanguage(v)
 		if err != nil {
@@ -56,7 +56,7 @@ func TranslationFromEnv() (*configTypes.Translation, *errors.TrainsError) {
 				Err:     err,
 			}
 		}
-		config.SourceLanguage = srcLang
+		config.SourceLanguage = &srcLang
 	}
 	if v := os.Getenv("TRAINS_TRANSLATION_TARGET_LANGUAGE"); v != "" {
 		targetLang, err := configTypes.GetLanguage(v)
@@ -67,7 +67,7 @@ func TranslationFromEnv() (*configTypes.Translation, *errors.TrainsError) {
 				Err:     err,
 			}
 		}
-		config.TargetLanguage = targetLang
+		config.TargetLanguage = &targetLang
 	}
 
 	return &config, nil

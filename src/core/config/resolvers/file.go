@@ -19,8 +19,7 @@ Reads a JSON configuration file and returns a Config object.
 */
 func FromFile(
 	path string,
-	config *configTypes.ConfigFile,
-) (*configTypes.ConfigFile, error) {
+) (*configTypes.ConfigFileOverrides, error) {
 	validate = validator.New()
 
 	fileContent, err := os.ReadFile(path)
@@ -28,19 +27,19 @@ func FromFile(
 		return nil, err
 	}
 
-	var configFile configTypes.ConfigFile
+	var configFile configTypes.ConfigFileOverrides
 	decoder := json.NewDecoder(bytes.NewReader(fileContent))
 	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&configFile)
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(fileContent, &config)
+	err = json.Unmarshal(fileContent, &configFile)
 	if err != nil {
 		return nil, err
 	}
 
-	err = validate.Struct(config)
+	err = validate.Struct(configFile)
 	if err != nil {
 		var invalidValidationError *validator.InvalidValidationError
 		if errors.As(err, &invalidValidationError) {
@@ -69,5 +68,5 @@ func FromFile(
 		return nil, fmt.Errorf("Validation config: %w", err)
 	}
 
-	return &config, nil
+	return &configFile, nil
 }
