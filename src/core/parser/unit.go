@@ -15,6 +15,9 @@ type TranslationUnit struct {
 	Segments []Segment
 }
 
+/*
+Formats the TranslationUnit as a JSON string.
+*/
 func (t TranslationUnit) String() string {
 	translationSet, err := json.MarshalIndent(t, "", "  ")
 	if err != nil {
@@ -23,11 +26,15 @@ func (t TranslationUnit) String() string {
 	return string(translationSet)
 }
 
+/*
+Estimates the number of tokens in the TranslationUnit.
+*/
 func (t *TranslationUnit) EstimateTokenNumber() int {
 	estimateNumberOfTokens := 0
 	for _, segment := range t.Segments {
 		if segment.Type == TextSegment {
-			estimateNumberOfTokens += int(math.Ceil(float64(len(segment.Value)) / TOKEN_PER_TEXT_SEGMENT_HEURISTIC))
+			ratio := float64(len(segment.Value)) / TOKEN_PER_TEXT_SEGMENT_HEURISTIC
+			estimateNumberOfTokens += int(math.Ceil(ratio))
 		}
 	}
 
