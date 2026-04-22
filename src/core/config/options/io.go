@@ -2,9 +2,48 @@ package configOptions
 
 import (
 	"os"
+	cmdTypes "trains/src/cli/types"
 	configTypes "trains/src/core/config/types"
 	"trains/src/core/errors"
 )
+
+/*
+Resolves the IO configuration from command line options.
+*/
+func IOFromOptions(
+	cliConfigOptions cmdTypes.CLIConfigOptions,
+) (*configTypes.IO, *errors.TrainsError) {
+	config := configTypes.IO{}
+
+	if cliConfigOptions.IO.InputFormat != "" {
+		fileFormat, err := configTypes.FlagToFileFormat(cliConfigOptions.IO.InputFormat)
+		if err != nil {
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid IO input format",
+				Err:     err,
+			}
+		}
+		config.InputFormat = fileFormat
+	}
+
+	if cliConfigOptions.IO.OutputFormat != "" {
+		fileFormat, err := configTypes.FlagToFileFormat(cliConfigOptions.IO.OutputFormat)
+		if err != nil {
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid IO output format",
+				Err:     err,
+			}
+		}
+		config.OutputFormat = fileFormat
+	}
+
+	config.SourcePath = cliConfigOptions.IO.SourcePath
+	config.TargetPath = cliConfigOptions.IO.TargetPath
+
+	return &config, nil
+}
 
 /*
 Resolves the IO configuration from environment variables.

@@ -3,6 +3,7 @@ package configOptions
 import (
 	"os"
 	"strconv"
+	cmdTypes "trains/src/cli/types"
 	configTypes "trains/src/core/config/types"
 	"trains/src/core/errors"
 )
@@ -10,8 +11,29 @@ import (
 /*
 Resolves the provider configuration from command line options.
 */
-func ProviderFromOptions(provider configTypes.ProviderName, config *configTypes.ConfigFile) {
+func ProviderFromOptions(
+	cliConfigOptions cmdTypes.CLIConfigOptions,
+) (*configTypes.Provider, *errors.TrainsError) {
+	config := configTypes.Provider{}
 
+	if cliConfigOptions.Provider.Name != "" {
+		providerName, err := configTypes.FlagToProvider(cliConfigOptions.Provider.Name)
+		if err != nil {
+			return nil, &errors.TrainsError{
+				Code:    errors.InvalidConfigError,
+				Message: "Invalid provider name",
+				Err:     err,
+			}
+		}
+		config.Name = providerName
+	}
+
+	config.ApiKey = cliConfigOptions.Provider.ApiKey
+	config.Model = cliConfigOptions.Provider.Model
+	config.BaseUrl = cliConfigOptions.Provider.BaseUrl
+	config.Timeout = cliConfigOptions.Provider.Timeout
+
+	return &config, nil
 }
 
 /*

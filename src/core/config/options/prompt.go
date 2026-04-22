@@ -2,11 +2,21 @@ package configOptions
 
 import (
 	"os"
+	cmdTypes "trains/src/cli/types"
 	configTypes "trains/src/core/config/types"
 	"trains/src/core/errors"
 )
 
-func PromptFromOptions(config *configTypes.ConfigFile) {
+/*
+Resolves the prompt configuration from command line options.
+*/
+func PromptFromOptions(
+	cliConfigOptions cmdTypes.CLIConfigOptions,
+) (*configTypes.Prompt, *errors.TrainsError) {
+	config := configTypes.Prompt{
+		Context: cliConfigOptions.Prompt.Context,
+	}
+	return &config, nil
 }
 
 /*

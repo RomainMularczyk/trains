@@ -1,7 +1,6 @@
 package configOptions
 
 import (
-	"fmt"
 	"os"
 	cmdTypes "trains/src/cli/types"
 	configTypes "trains/src/core/config/types"
