@@ -1,18 +1,12 @@
 package config
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"os"
-	"strings"
-	"trains/src/core/config/options"
+	"trains/src/core/config/resolvers"
 	"trains/src/core/config/types"
-
-	"github.com/go-playground/validator/v10"
+	"trains/src/core/errors"
+	lockFile "trains/src/core/lock/file"
+	lockTypes "trains/src/core/lock/types"
 )
-
-var validate *validator.Validate
 
 /*
 Resolve the configuration applying variable precedence.
@@ -22,75 +16,52 @@ Variable precedence order:
  3. Configuration file
  4. Default values
 */
-func ResolveConfig(path string) types.Config {
-	config, err := fromFile(path)
+func ResolveConfig(path string, provider types.ProviderName) (*types.RuntimeConfig, error) {
+	config, err := resolvers.FromFile(path)
 	if err != nil {
-		fmt.Println(err)
+		return nil, &errors.TrainsError{
+			Code:    errors.InvalidConfigError,
+			Message: err.Error(),
+			Err:     err,
+		}
 	}
 
-	fromEnv(config)
-	fromOptions(config)
+	lockFile, err := lockFile.LoadOrCreate(config.Lock.Path)
+	if err != nil {
+		return nil, &errors.TrainsError{
+			Code:    errors.InvalidLockError,
+			Message: err.Error(),
+			Err:     err,
+		}
+	}
 
-	return *config
+	// Resolve configuration applying variable precedence rules
+	resolvers.FromEnv(config)
+	resolvers.FromOptions(config)
+
+	runtimeConfig := buildRuntimeConfig(config, provider, lockFile)
+
+	return &runtimeConfig, nil
 }
 
 /*
-Reads a JSON configuration file and returns a Config object.
+Builds the runtime configuration from configuration files and lock file.
 */
-func fromFile(path string) (*types.Config, error) {
-	validate = validator.New()
+func buildRuntimeConfig(
+	config *types.ConfigFile,
+	provider types.ProviderName,
+	lockFile *lockTypes.LockFile,
+) types.RuntimeConfig {
+	providerConfig := types.ProviderNameToProviderConfig(provider, *config)
 
-	fileContent, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
+	return types.RuntimeConfig{
+		SelectedProvider: types.Provider{
+			Name:    provider,
+			ApiKey:  providerConfig.ApiKey,
+			Model:   providerConfig.Model,
+			BaseUrl: providerConfig.BaseUrl,
+			Timeout: providerConfig.Timeout,
+		},
+		Locks: types.CreateLockFileEntries(*lockFile),
 	}
-
-	var config types.Config
-	err = json.Unmarshal(fileContent, &config)
-	if err != nil {
-		return nil, err
-	}
-
-	err = validate.Struct(config)
-	if err != nil {
-		var invalidValidationError *validator.InvalidValidationError
-		if errors.As(err, &invalidValidationError) {
-			return nil, err
-		}
-
-		var validateErrors validator.ValidationErrors
-		if errors.As(err, &validateErrors) {
-			var errorMessages []string
-			for _, e := range validateErrors {
-				errorMessages = append(
-					errorMessages,
-					fmt.Sprintf(
-						"[%s][%s] The property '%s' is required.",
-						e.StructNamespace(),
-						e.Type(),
-						e.Field()),
-				)
-			}
-			return nil, fmt.Errorf(
-				"Configuration validation failed:\n%s",
-				strings.Join(errorMessages, "\n"),
-			)
-		}
-
-		return nil, fmt.Errorf("Validation config: %w", err)
-	}
-
-	return &config, nil
-}
-
-func fromEnv(config *types.Config) {
-	configOptions.BatchingFromEnv(config)
-	configOptions.IOFromEnv(config)
-	configOptions.PromptFromEnv(config)
-	configOptions.ProviderFromEnv(config)
-	configOptions.TranslationFromEnv(config)
-}
-
-func fromOptions(config *types.Config) {
-
 }
