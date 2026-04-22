@@ -17,8 +17,7 @@ Run the translation pipeline.
 func (p *Pipeline) Run(
 	root string,
 	format types.FileFormat,
-	provider types.ProviderName,
-	config types.Config,
+	config types.RuntimeConfig,
 ) {
 	// Create channels
 	filePaths := make(chan string)
@@ -28,7 +27,8 @@ func (p *Pipeline) Run(
 	translations := make(chan string)
 
 	processor, err := io.Processor(format)
-	llm := translation.NewLLM(provider, config)
+	llm := translation.NewLLM(config)
+	fmt.Println(llm)
 	if err != nil {
 		// TODO: handle error
 		fmt.Println(err)
