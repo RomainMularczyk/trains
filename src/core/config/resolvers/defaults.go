@@ -11,6 +11,11 @@ const (
 	DefaultOutputFormat = configTypes.JSON
 	DefaultSourcePath   = "./source"
 	DefaultTargetPath   = "./target"
+	// Config defaults
+	DefaultConfigPath = "./trains.json"
+	// Lock defaults
+	DefaultLockVersion = 1
+	DefaultLockPath    = "./trains-lock.json"
 	// Prompt defaults
 	DefaultPromptContext = "Translate the following text"
 	// Provider defaults
@@ -33,11 +38,25 @@ func FromDefaults() *configTypes.ConfigFile {
 		UnitLimit:  DefaultTranslationUnitLimit,
 	}
 
+	config := configTypes.Config{
+		Path: DefaultConfigPath,
+	}
+
 	io := configTypes.IO{
 		InputFormat:  DefaultInputFormat,
 		OutputFormat: DefaultOutputFormat,
 		SourcePath:   DefaultSourcePath,
 		TargetPath:   DefaultTargetPath,
+	}
+
+	language := configTypes.Translation{
+		SourceLanguage: DefaultSourceLanguage,
+		TargetLanguage: DefaultTargetLanguage,
+	}
+
+	lock := configTypes.Lock{
+		Version: DefaultLockVersion,
+		Path:    DefaultLockPath,
 	}
 
 	prompt := configTypes.Prompt{
@@ -52,20 +71,17 @@ func FromDefaults() *configTypes.ConfigFile {
 		Timeout: DefaultProviderTimeout,
 	}
 
-	translation := configTypes.Translation{
-		SourceLanguage: DefaultSourceLanguage,
-		TargetLanguage: DefaultTargetLanguage,
-	}
-
-	config := configTypes.ConfigFile{
+	configFile := configTypes.ConfigFile{
+		Batching: batching,
+		Config:   config,
+		IO:       io,
+		Lock:     lock,
+		Prompt:   prompt,
 		Provider: configTypes.Providers{
 			OpenAI: &provider,
 		},
-		Translation: translation,
-		Prompt:      prompt,
-		Batching:    batching,
-		IO:          io,
+		Translation: language,
 	}
 
-	return &config
+	return &configFile
 }
