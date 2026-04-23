@@ -27,7 +27,7 @@ func FromEnv() (*configTypes.ConfigFileOverrides, *errors.TrainsError) {
 	if err != nil {
 		return nil, err
 	}
-	providerConfig, err := configOptions.ProviderFromEnv()
+	providersConfig, err := configOptions.ProvidersFromEnv()
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func FromEnv() (*configTypes.ConfigFileOverrides, *errors.TrainsError) {
 		IO:          ioConfig,
 		Lock:        lockConfig,
 		Prompt:      promptConfig,
-		Provider:    providerConfig,
+		Providers:   providersConfig,
 		Translation: translationConfig,
 	}
 

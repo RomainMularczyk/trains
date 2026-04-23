@@ -16,12 +16,12 @@ type ConfigFile struct {
 	IO          IO
 	Lock        Lock
 	Prompt      Prompt
-	Provider    Providers
+	Providers   Providers
 	Translation Translation
 }
 
 type ConfigFileOverrides struct {
-	Provider    *ProvidersOverrides
+	Providers   *ProvidersOverrides
 	Translation *TranslationOverrides
 	Prompt      *PromptOverrides
 	Batching    *BatchingOverrides

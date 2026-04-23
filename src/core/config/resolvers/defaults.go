@@ -77,8 +77,8 @@ func FromDefaults() configTypes.ConfigFile {
 		IO:       io,
 		Lock:     lock,
 		Prompt:   prompt,
-		Provider: configTypes.Providers{
-			OpenAI: &provider,
+		Providers: configTypes.Providers{
+			configTypes.OpenAI: &provider,
 		},
 		Translation: language,
 	}

@@ -45,7 +45,10 @@ func TranslationFromOptions(
 /*
 Merges the translation configuration with the given overrides.
 */
-func MergeTranslationConfig(dest *configTypes.Translation, overrides *configTypes.TranslationOverrides) {
+func MergeTranslationConfig(
+	dest *configTypes.Translation,
+	overrides *configTypes.TranslationOverrides,
+) {
 	if overrides.SourceLanguage != nil {
 		dest.SourceLanguage = *overrides.SourceLanguage
 	}

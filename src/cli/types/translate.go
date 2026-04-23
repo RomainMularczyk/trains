@@ -1,5 +1,7 @@
 package cmdTypes
 
+import configTypes "trains/src/core/config/types"
+
 type BatchingOptions struct {
 	TokenLimit int
 	UnitLimit  int
@@ -25,6 +27,8 @@ type PromptOptions struct {
 	Context string
 }
 
+type ProvidersOptions map[configTypes.ProviderName]ProviderOptions
+
 type ProviderOptions struct {
 	Name    string
 	ApiKey  string
@@ -44,6 +48,6 @@ type CLIConfigOptions struct {
 	IO          IOOptions
 	Lock        LockOptions
 	Prompt      PromptOptions
-	Provider    ProviderOptions
+	Providers   ProvidersOptions
 	Translation TranslationOptions
 }

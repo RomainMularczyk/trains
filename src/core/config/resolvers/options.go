@@ -28,7 +28,7 @@ func FromOptions(
 		return nil, err
 	}
 
-	providerConfig, err := configOptions.ProviderFromOptions(cliConfigOptions)
+	providersConfig, err := configOptions.ProvidersFromOptions(cliConfigOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -52,43 +52,11 @@ func FromOptions(
 		Prompt: &configTypes.PromptOverrides{
 			Context: &promptConfig.Context,
 		},
+		Providers: providersConfig,
 		Translation: &configTypes.TranslationOverrides{
 			SourceLanguage: &translationConfig.SourceLanguage,
 			TargetLanguage: &translationConfig.TargetLanguage,
 		},
-	}
-
-	// Provider overrides need special handling based on provider name
-	if providerConfig.Name != "" {
-		providerOverrides := &configTypes.ProviderOverrides{
-			ApiKey:  &providerConfig.ApiKey,
-			Model:   &providerConfig.Model,
-			BaseUrl: &providerConfig.BaseUrl,
-			Timeout: &providerConfig.Timeout,
-		}
-
-		switch providerConfig.Name {
-		case configTypes.OpenAI:
-			overrides.Provider = &configTypes.ProvidersOverrides{OpenAI: providerOverrides}
-		case configTypes.Anthropic:
-			overrides.Provider = &configTypes.ProvidersOverrides{Anthropic: providerOverrides}
-		case configTypes.Google:
-			overrides.Provider = &configTypes.ProvidersOverrides{Google: providerOverrides}
-		case configTypes.Mistral:
-			overrides.Provider = &configTypes.ProvidersOverrides{Mistral: providerOverrides}
-		case configTypes.XAI:
-			overrides.Provider = &configTypes.ProvidersOverrides{XAI: providerOverrides}
-		case configTypes.DeepSeeker:
-			overrides.Provider = &configTypes.ProvidersOverrides{DeepSeeker: providerOverrides}
-		case configTypes.Cohere:
-			overrides.Provider = &configTypes.ProvidersOverrides{Cohere: providerOverrides}
-		case configTypes.Perplexity:
-			overrides.Provider = &configTypes.ProvidersOverrides{Perplexity: providerOverrides}
-		case configTypes.OpenRouter:
-			overrides.Provider = &configTypes.ProvidersOverrides{OpenRouter: providerOverrides}
-		case configTypes.MiniMax:
-			overrides.Provider = &configTypes.ProvidersOverrides{MiniMax: providerOverrides}
-		}
 	}
 
 	return overrides, nil

@@ -9,15 +9,15 @@ import (
 )
 
 /*
-Resolves the provider configuration from command line options.
+Resolves the providers configuration from command line options.
 */
-func ProviderFromOptions(
+func ProvidersFromOptions(
 	cliConfigOptions cmdTypes.CLIConfigOptions,
-) (*configTypes.ProviderOverrides, *errors.TrainsError) {
-	config := configTypes.ProviderOverrides{}
+) (*configTypes.ProvidersOverrides, *errors.TrainsError) {
+	config := make(configTypes.ProvidersOverrides)
 
-	if cliConfigOptions.Provider.Name != "" {
-		providerName, err := configTypes.FlagToProvider(cliConfigOptions.Provider.Name)
+	for name, options := range cliConfigOptions.Providers {
+		providerName, err := configTypes.FlagToProvider(options.Name)
 		if err != nil {
 			return nil, &errors.TrainsError{
 				Code:    errors.InvalidConfigError,
@@ -25,13 +25,13 @@ func ProviderFromOptions(
 				Err:     err,
 			}
 		}
-		config.Name = &providerName
-	}
 
-	config.ApiKey = &cliConfigOptions.Provider.ApiKey
-	config.Model = &cliConfigOptions.Provider.Model
-	config.BaseUrl = &cliConfigOptions.Provider.BaseUrl
-	config.Timeout = &cliConfigOptions.Provider.Timeout
+		config[name].Name = &providerName
+		config[name].ApiKey = &options.ApiKey
+		config[name].Model = &options.Model
+		config[name].BaseUrl = &options.BaseUrl
+		config[name].Timeout = &options.Timeout
+	}
 
 	return &config, nil
 }
@@ -39,39 +39,19 @@ func ProviderFromOptions(
 /*
 Resolves the provider configuration from environment variables.
 */
-func ProviderFromEnv() (*configTypes.ProvidersOverrides, *errors.TrainsError) {
-	providers := configTypes.ProvidersOverrides{}
+func ProvidersFromEnv() (*configTypes.ProvidersOverrides, *errors.TrainsError) {
+	providers := make(configTypes.ProvidersOverrides)
 
-	if openAI := OpenAIFromEnv(); openAI != nil {
-		providers.OpenAI = openAI
-	}
-	if anthropic := AnthropicFromEnv(); anthropic != nil {
-		providers.Anthropic = anthropic
-	}
-	if google := GoogleFromEnv(); google != nil {
-		providers.Google = google
-	}
-	if mistral := MistralFromEnv(); mistral != nil {
-		providers.Mistral = mistral
-	}
-	if xAI := XAIFromEnv(); xAI != nil {
-		providers.XAI = xAI
-	}
-	if deepSeeker := DeepSeekerFromEnv(); deepSeeker != nil {
-		providers.DeepSeeker = deepSeeker
-	}
-	if cohere := CohereFromEnv(); cohere != nil {
-		providers.Cohere = cohere
-	}
-	if perplexity := PerplexityFromEnv(); perplexity != nil {
-		providers.Perplexity = perplexity
-	}
-	if openRouter := OpenRouterFromEnv(); openRouter != nil {
-		providers.OpenRouter = openRouter
-	}
-	if miniMax := MiniMaxFromEnv(); miniMax != nil {
-		providers.MiniMax = miniMax
-	}
+	providers[configTypes.OpenAI] = OpenAIFromEnv()
+	providers[configTypes.Anthropic] = AnthropicFromEnv()
+	providers[configTypes.Google] = GoogleFromEnv()
+	providers[configTypes.Mistral] = MistralFromEnv()
+	providers[configTypes.XAI] = XAIFromEnv()
+	providers[configTypes.DeepSeek] = DeepSeekFromEnv()
+	providers[configTypes.Cohere] = CohereFromEnv()
+	providers[configTypes.Perplexity] = PerplexityFromEnv()
+	providers[configTypes.OpenRouter] = OpenRouterFromEnv()
+	providers[configTypes.MiniMax] = MiniMaxFromEnv()
 
 	return &providers, nil
 }
@@ -146,9 +126,9 @@ func XAIFromEnv() *configTypes.ProviderOverrides {
 	return provider
 }
 
-func DeepSeekerFromEnv() *configTypes.ProviderOverrides {
-	provider := providerFromEnv("TRAINS_PROVIDER_DEEPSEEKER")
-	providerName := configTypes.DeepSeeker
+func DeepSeekFromEnv() *configTypes.ProviderOverrides {
+	provider := providerFromEnv("TRAINS_PROVIDER_DEEPSEEK")
+	providerName := configTypes.DeepSeek
 	if provider != nil {
 		provider.Name = &providerName
 	}
@@ -215,35 +195,16 @@ func MergeProviderConfig(dest *configTypes.Provider, overrides *configTypes.Prov
 /*
 Merges the providers configuration with the given overrides.
 */
-func MergeProvidersConfig(dest *configTypes.Providers, overrides *configTypes.ProvidersOverrides) {
-	if overrides.OpenAI != nil && dest.OpenAI != nil {
-		MergeProviderConfig(dest.OpenAI, overrides.OpenAI)
-	}
-	if overrides.Anthropic != nil && dest.Anthropic != nil {
-		MergeProviderConfig(dest.Anthropic, overrides.Anthropic)
-	}
-	if overrides.Google != nil && dest.Google != nil {
-		MergeProviderConfig(dest.Google, overrides.Google)
-	}
-	if overrides.Mistral != nil && dest.Mistral != nil {
-		MergeProviderConfig(dest.Mistral, overrides.Mistral)
-	}
-	if overrides.XAI != nil && dest.XAI != nil {
-		MergeProviderConfig(dest.XAI, overrides.XAI)
-	}
-	if overrides.DeepSeeker != nil && dest.DeepSeeker != nil {
-		MergeProviderConfig(dest.DeepSeeker, overrides.DeepSeeker)
-	}
-	if overrides.Cohere != nil && dest.Cohere != nil {
-		MergeProviderConfig(dest.Cohere, overrides.Cohere)
-	}
-	if overrides.Perplexity != nil && dest.Perplexity != nil {
-		MergeProviderConfig(dest.Perplexity, overrides.Perplexity)
-	}
-	if overrides.OpenRouter != nil && dest.OpenRouter != nil {
-		MergeProviderConfig(dest.OpenRouter, overrides.OpenRouter)
-	}
-	if overrides.MiniMax != nil && dest.MiniMax != nil {
-		MergeProviderConfig(dest.MiniMax, overrides.MiniMax)
+func MergeProvidersConfig(
+	dest *configTypes.Providers,
+	overrides *configTypes.ProvidersOverrides,
+) {
+	for name, override := range *overrides {
+		if override == nil {
+			continue
+		}
+		if destProvider, ok := (*dest)[name]; ok && destProvider != nil {
+			MergeProviderConfig(destProvider, override)
+		}
 	}
 }

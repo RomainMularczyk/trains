@@ -1,7 +1,7 @@
 package config
 
 import (
-	"trains/src/cli/cmd"
+	"fmt"
 	cmdTypes "trains/src/cli/types"
 	configOptions "trains/src/core/config/options"
 	"trains/src/core/config/resolvers"
@@ -52,6 +52,7 @@ func ResolveConfig(
 	mergedConfig := MergeConfig(configs)
 
 	lockFile, err := lockFile.LoadOrCreate(mergedConfig.Lock.Path)
+	fmt.Println(lockFile)
 	if err != nil {
 		return nil, &errors.TrainsError{
 			Code:    errors.InvalidLockError,
@@ -74,7 +75,7 @@ func MergeConfig(
 		IO:          configs.Default.IO,
 		Lock:        configs.Default.Lock,
 		Prompt:      configs.Default.Prompt,
-		Provider:    configs.Default.Provider,
+		Providers:   configs.Default.Providers,
 		Translation: configs.Default.Translation,
 	}
 
@@ -83,7 +84,7 @@ func MergeConfig(
 	configOptions.MergeIOConfig(&config.IO, configs.File.IO)
 	configOptions.MergeLockConfig(&config.Lock, configs.File.Lock)
 	configOptions.MergePromptConfig(&config.Prompt, configs.File.Prompt)
-	configOptions.MergeProviderConfig(&config.Provider, configs.File.Provider)
+	configOptions.MergeProvidersConfig(&config.Providers, configs.File.Providers)
 	configOptions.MergeTranslationConfig(&config.Translation, configs.File.Translation)
 
 	// Env overrides
@@ -91,7 +92,7 @@ func MergeConfig(
 	configOptions.MergeIOConfig(&config.IO, configs.Env.IO)
 	configOptions.MergeLockConfig(&config.Lock, configs.Env.Lock)
 	configOptions.MergePromptConfig(&config.Prompt, configs.Env.Prompt)
-	configOptions.MergeProviderConfig(&config.Provider, configs.Env.Provider)
+	configOptions.MergeProvidersConfig(&config.Providers, configs.Env.Providers)
 	configOptions.MergeTranslationConfig(&config.Translation, configs.Env.Translation)
 
 	// CLI overrides
@@ -99,7 +100,7 @@ func MergeConfig(
 	configOptions.MergeIOConfig(&config.IO, configs.CLI.IO)
 	configOptions.MergeLockConfig(&config.Lock, configs.CLI.Lock)
 	configOptions.MergePromptConfig(&config.Prompt, configs.CLI.Prompt)
-	configOptions.MergeProviderConfig(&config.Provider, configs.CLI.Provider)
+	configOptions.MergeProvidersConfig(&config.Providers, configs.CLI.Providers)
 	configOptions.MergeTranslationConfig(&config.Translation, configs.CLI.Translation)
 
 	return config
@@ -125,16 +126,18 @@ Builds the runtime configuration from configuration files and lock file.
 func buildRuntimeConfig(
 	config configTypes.ConfigFile,
 ) configTypes.RuntimeConfig {
-	providerConfig := configTypes.ProviderNameToProviderConfig(provider, *config)
-
-	return types.RuntimeConfig{
-		SelectedProvider: types.Provider{
-			Name:    provider,
-			ApiKey:  providerConfig.ApiKey,
-			Model:   providerConfig.Model,
-			BaseUrl: providerConfig.BaseUrl,
-			Timeout: providerConfig.Timeout,
-		},
-		Locks: types.CreateLockFileEntries(*lockFile),
-	}
+	fmt.Println(config)
+	// providerConfig := configTypes.ProviderNameToProviderConfig(provider, *config)
+	//
+	// return configTypes.RuntimeConfig{
+	// 	SelectedProvider: configTypes.Provider{
+	// 		Name:    provider,
+	// 		ApiKey:  providerConfig.ApiKey,
+	// 		Model:   providerConfig.Model,
+	// 		BaseUrl: providerConfig.BaseUrl,
+	// 		Timeout: providerConfig.Timeout,
+	// 	},
+	// 	Locks: types.CreateLockFileEntries(*lockFile),
+	// }
+	return configTypes.RuntimeConfig{}
 }
