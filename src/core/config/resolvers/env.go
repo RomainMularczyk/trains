@@ -31,6 +31,10 @@ func FromEnv() (*configTypes.ConfigFileOverrides, *errors.TrainsError) {
 	if err != nil {
 		return nil, err
 	}
+	selectedProviderConfig, err := configOptions.SelectedProviderFromEnv()
+	if err != nil {
+		return nil, err
+	}
 	translationConfig, err := configOptions.TranslationFromEnv()
 	if err != nil {
 		return nil, err
@@ -38,12 +42,13 @@ func FromEnv() (*configTypes.ConfigFileOverrides, *errors.TrainsError) {
 
 	// Create a new config with all env vars applied
 	newConfig := &configTypes.ConfigFileOverrides{
-		Batching:    batchingConfig,
-		IO:          ioConfig,
-		Lock:        lockConfig,
-		Prompt:      promptConfig,
-		Providers:   providersConfig,
-		Translation: translationConfig,
+		Batching:         batchingConfig,
+		IO:               ioConfig,
+		Lock:             lockConfig,
+		Prompt:           promptConfig,
+		Providers:        providersConfig,
+		SelectedProvider: selectedProviderConfig,
+		Translation:      translationConfig,
 	}
 
 	return newConfig, nil

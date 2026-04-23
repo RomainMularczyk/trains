@@ -33,6 +33,11 @@ func FromOptions(
 		return nil, err
 	}
 
+	selectedProviderConfig, err := configOptions.SelectedProviderFromOptions(cliConfigOptions)
+	if err != nil {
+		return nil, err
+	}
+
 	translationConfig, err := configOptions.TranslationFromOptions(cliConfigOptions)
 	if err != nil {
 		return nil, err
@@ -52,7 +57,8 @@ func FromOptions(
 		Prompt: &configTypes.PromptOverrides{
 			Context: &promptConfig.Context,
 		},
-		Providers: providersConfig,
+		Providers:        providersConfig,
+		SelectedProvider: selectedProviderConfig,
 		Translation: &configTypes.TranslationOverrides{
 			SourceLanguage: &translationConfig.SourceLanguage,
 			TargetLanguage: &translationConfig.TargetLanguage,

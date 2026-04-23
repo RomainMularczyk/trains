@@ -43,11 +43,12 @@ type TranslationOptions struct {
 }
 
 type CLIConfigOptions struct {
-	Batching    BatchingOptions
-	Config      ConfigOptions
-	IO          IOOptions
-	Lock        LockOptions
-	Prompt      PromptOptions
-	Providers   ProvidersOptions
-	Translation TranslationOptions
+	Batching         BatchingOptions
+	Config           ConfigOptions
+	IO               IOOptions
+	Lock             LockOptions
+	Prompt           PromptOptions
+	Providers        ProvidersOptions
+	SelectedProvider configTypes.ProviderName
+	Translation      TranslationOptions
 }

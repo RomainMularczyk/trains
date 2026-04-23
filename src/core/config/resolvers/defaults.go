@@ -80,7 +80,8 @@ func FromDefaults() configTypes.ConfigFile {
 		Providers: configTypes.Providers{
 			configTypes.OpenAI: &provider,
 		},
-		Translation: language,
+		SelectedProvider: configTypes.OpenAI,
+		Translation:      language,
 	}
 
 	return configFile

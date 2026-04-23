@@ -11,22 +11,24 @@ type RuntimeConfig struct {
 }
 
 type ConfigFile struct {
-	Batching    Batching
-	Config      Config
-	IO          IO
-	Lock        Lock
-	Prompt      Prompt
-	Providers   Providers
-	Translation Translation
+	Batching         Batching
+	Config           Config
+	IO               IO
+	Lock             Lock
+	Prompt           Prompt
+	Providers        Providers
+	SelectedProvider ProviderName
+	Translation      Translation
 }
 
 type ConfigFileOverrides struct {
-	Providers   *ProvidersOverrides
-	Translation *TranslationOverrides
-	Prompt      *PromptOverrides
-	Batching    *BatchingOverrides
-	IO          *IOOverrides
-	Lock        *LockOverrides
+	Batching         *BatchingOverrides
+	IO               *IOOverrides
+	Lock             *LockOverrides
+	Prompt           *PromptOverrides
+	Providers        *ProvidersOverrides
+	SelectedProvider *ProviderName
+	Translation      *TranslationOverrides
 }
 
 type Config struct {

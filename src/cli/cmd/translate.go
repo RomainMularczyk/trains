@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"trains/src/core/config/resolvers"
-	"trains/src/core/orchestration"
+	configTypes "trains/src/core/config/types"
+
+	cmdTypes "trains/src/cli/types"
 
 	"github.com/spf13/cobra"
-	cmdTypes "trains/src/cli/types"
 )
 
 var batchingOptions cmdTypes.BatchingOptions
@@ -16,6 +17,7 @@ var ioOptions cmdTypes.IOOptions
 var lockOptions cmdTypes.LockOptions
 var promptOptions cmdTypes.PromptOptions
 var providerOptions cmdTypes.ProviderOptions
+var providersOptions = make(map[configTypes.ProviderName]cmdTypes.ProviderOptions)
 var translationOptions cmdTypes.TranslationOptions
 
 var translateCmd = &cobra.Command{
@@ -24,22 +26,31 @@ var translateCmd = &cobra.Command{
 	Long: `Translates input files from one format to another.
 Supports JSON input files with configurable parsing options.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cliConfigOptions := cmdTypes.CLIConfigOptions{
-			Batching:    batchingOptions,
-			Config:      configOptions,
-			IO:          ioOptions,
-			Lock:        lockOptions,
-			Prompt:      promptOptions,
-			Provider:    providerOptions,
-			Translation: translationOptions,
-		}
-		config, err := config.ResolveConfig(cliConfigOptions)
+		providerName, err := configTypes.FlagToProvider(providerOptions.Name)
 		if err != nil {
-			return fmt.Errorf("Invalid file format: %v", err)
+			return err
 		}
+		providersOptions[providerName] = providerOptions
+		fmt.Println(providersOptions)
 
-		pipe := orchestration.Pipeline{}
-		pipe.Run(config)
+		cliConfigOptions := cmdTypes.CLIConfigOptions{
+			Batching:         batchingOptions,
+			Config:           configOptions,
+			IO:               ioOptions,
+			Lock:             lockOptions,
+			Prompt:           promptOptions,
+			Providers:        providersOptions,
+			SelectedProvider: providerName,
+			Translation:      translationOptions,
+		}
+		fmt.Println(cliConfigOptions)
+		// config, err := config.ResolveConfig(cliConfigOptions)
+		// if err != nil {
+		// 	return fmt.Errorf("Invalid file format: %v", err)
+		// }
+
+		//pipe := orchestration.Pipeline{}
+		// pipe.Run(config)
 		return nil
 	},
 }
@@ -48,17 +59,15 @@ func init() {
 	// --------------------------------------------
 	// ----------------- Batching -----------------
 	// --------------------------------------------
-	translateCmd.Flags().IntVarP(
+	translateCmd.Flags().IntVar(
 		&batchingOptions.TokenLimit,
 		"tokenLimit",
-		"bt",
 		resolvers.DefaultTokenLimit,
 		"Batching token limit",
 	)
-	translateCmd.Flags().IntVarP(
+	translateCmd.Flags().IntVar(
 		&batchingOptions.UnitLimit,
 		"unitLimit",
-		"bu",
 		resolvers.DefaultTranslationUnitLimit,
 		"Batching translation unit limit",
 	)
@@ -116,10 +125,9 @@ func init() {
 		resolvers.DefaultLockPath,
 		"Lock path",
 	)
-	translateCmd.Flags().IntVarP(
+	translateCmd.Flags().IntVar(
 		&lockOptions.Version,
 		"lockVersion",
-		"ve",
 		resolvers.DefaultLockVersion,
 		"Lock version",
 	)
@@ -127,31 +135,29 @@ func init() {
 	// --------------------------------------------
 	// ----------------- Provider -----------------
 	// --------------------------------------------
-	translateCmd.Flags().IntVarP(
+	translateCmd.Flags().IntVar(
 		&providerOptions.Timeout,
 		"timeout",
-		"to",
 		resolvers.DefaultProviderTimeout,
 		"Provider timeout",
 	)
 	translateCmd.Flags().StringVarP(
 		&providerOptions.ApiKey,
 		"apiKey",
-		"pk",
+		"k",
 		resolvers.DefaultProviderApiKey,
 		"Provider API key",
 	)
 	translateCmd.Flags().StringVarP(
 		&providerOptions.Model,
 		"model",
-		"pm",
+		"m",
 		resolvers.DefaultProviderModel,
 		"Provider model",
 	)
-	translateCmd.Flags().StringVarP(
+	translateCmd.Flags().StringVar(
 		&providerOptions.BaseUrl,
 		"baseUrl",
-		"pu",
 		resolvers.DefaultProviderBaseUrl,
 		"Provider base URL",
 	)
@@ -166,10 +172,9 @@ func init() {
 	// ------------------------------------------
 	// ----------------- Prompt -----------------
 	// ------------------------------------------
-	translateCmd.Flags().StringVarP(
+	translateCmd.Flags().StringVar(
 		&promptOptions.Context,
 		"context",
-		"ctx",
 		resolvers.DefaultPromptContext,
 		"Prompt context",
 	)
@@ -177,17 +182,15 @@ func init() {
 	// -----------------------------------------------
 	// ----------------- Translation -----------------
 	// -----------------------------------------------
-	translateCmd.Flags().StringVarP(
+	translateCmd.Flags().StringVar(
 		&translationOptions.SourceLanguage,
 		"srcLang",
-		"sl",
 		"en",
 		"Source language",
 	)
-	translateCmd.Flags().StringVarP(
+	translateCmd.Flags().StringVar(
 		&translationOptions.TargetLanguage,
 		"targetLang",
-		"tl",
 		"fr",
 		"Target language",
 	)
