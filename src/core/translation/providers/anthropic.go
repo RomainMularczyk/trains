@@ -2,6 +2,7 @@ package providers
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"trains/src/core/config/types"
 	"trains/src/core/parser"
@@ -17,33 +18,32 @@ func (a *Anthropic) Name() string {
 }
 
 func (a *Anthropic) Translate(
-	config types.Config,
+	config configTypes.RuntimeConfig,
 	translationBatches <-chan parser.TranslationBatch,
-	translations chan<- parser.TranslationUnit,
+	translations chan<- string,
 ) {
-	if config.Provider.Anthropic.ApiKey != "" {
-		os.Setenv("ANTHROPIC_API_KEY", config.Provider.Anthropic.ApiKey)
+	if config.SelectedProvider.ApiKey != "" {
+		os.Setenv("ANTHROPIC_API_KEY", config.SelectedProvider.ApiKey)
 	}
-	model := anthropic.Chat(config.Provider.Anthropic.Model)
+	model := anthropic.Chat(config.SelectedProvider.Model)
 
 	for translationBatch := range translationBatches {
+		prompt := fmt.Sprintf(
+			configTypes.SYSTEM_PROMPT,
+			translationBatch.Context,
+			"Target language: French",
+			translationBatch.Units,
+		)
 		result, err := goai.GenerateText(
 			context.Background(),
 			model,
-			goai.WithPrompt(translationBatch.Context),
+			goai.WithPrompt(prompt),
 		)
+		fmt.Println(result.Text)
 		if err != nil {
 			continue
 		}
 
-		for _, unit := range translationBatch.Units {
-			translations <- parser.TranslationUnit{
-				Fullkey:  unit.Fullkey,
-				Path:     unit.Path,
-				Source:   unit.Source,
-				Target:   result.Text,
-				Segments: unit.Segments,
-			}
-		}
+		translations <- result.Text
 	}
 }

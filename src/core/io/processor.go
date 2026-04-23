@@ -2,7 +2,7 @@ package io
 
 import (
 	"fmt"
-	"trains/src/core/config/types"
+	configTypes "trains/src/core/config/types"
 	"trains/src/core/io/formats/json"
 	"trains/src/core/parser"
 )
@@ -32,9 +32,9 @@ func (r *ReaderContext) Read(path <-chan string, value chan<- any) {
 	r.reader.Read(path, value)
 }
 
-func Processor(format types.FileFormat) (*FormatDriver, error) {
+func Processor(format configTypes.FileFormat) (*FormatDriver, error) {
 	switch format {
-	case types.JSON:
+	case configTypes.JSON:
 		return &FormatDriver{
 			&json.JSONReader{},
 			&json.JSONParser{},

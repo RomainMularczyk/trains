@@ -9,19 +9,19 @@ import (
 type LLM interface {
 	Name() string
 	Translate(
-		config types.RuntimeConfig,
+		config configTypes.RuntimeConfig,
 		translationBatches <-chan parser.TranslationBatch,
 		translations chan<- string,
 	)
 }
 
-func NewLLM(config types.RuntimeConfig) LLM {
+func NewLLM(config configTypes.RuntimeConfig) LLM {
 	switch config.SelectedProvider.Name {
-	case types.OpenAI:
+	case configTypes.OpenAI:
 		return &providers.OpenAI{}
-	case types.Anthropic:
+	case configTypes.Anthropic:
 		return &providers.Anthropic{}
-	case types.Mistral:
+	case configTypes.Mistral:
 		return &providers.Mistral{}
 	default:
 		return &providers.OpenAI{}

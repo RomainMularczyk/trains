@@ -2,6 +2,7 @@ package providers
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"trains/src/core/config/types"
 	"trains/src/core/parser"
@@ -17,34 +18,32 @@ func (o *OpenAI) Name() string {
 }
 
 func (o *OpenAI) Translate(
-	config types.Config,
+	config configTypes.RuntimeConfig,
 	translationBatches <-chan parser.TranslationBatch,
-	translations chan<- parser.TranslationUnit,
+	translations chan<- string,
 ) {
-	if config.Provider.OpenAI.ApiKey != "" {
-		os.Setenv("OPENAI_API_KEY", config.Provider.OpenAI.ApiKey)
+	if config.SelectedProvider.ApiKey != "" {
+		os.Setenv("OPENAI_API_KEY", config.SelectedProvider.ApiKey)
 	}
-	model := openai.Chat(config.Provider.OpenAI.Model)
+	model := openai.Chat(config.SelectedProvider.Model)
 
 	for translationBatch := range translationBatches {
+		prompt := fmt.Sprintf(
+			configTypes.SYSTEM_PROMPT,
+			translationBatch.Context,
+			"Target language: French",
+			translationBatch.Units,
+		)
 		result, err := goai.GenerateText(
 			context.Background(),
 			model,
-			goai.WithPrompt(translationBatch.Context),
+			goai.WithPrompt(prompt),
 		)
+		fmt.Println(result.Text)
 		if err != nil {
-			// TODO: add error handling
 			continue
 		}
 
-		for _, unit := range translationBatch.Units {
-			translations <- parser.TranslationUnit{
-				Fullkey:  unit.Fullkey,
-				Path:     unit.Path,
-				Source:   unit.Source,
-				Target:   result.Text,
-				Segments: unit.Segments,
-			}
-		}
+		translations <- result.Text
 	}
 }

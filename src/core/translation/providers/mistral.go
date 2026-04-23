@@ -18,18 +18,18 @@ func (m *Mistral) Name() string {
 }
 
 func (m *Mistral) Translate(
-	config types.Config,
+	config configTypes.RuntimeConfig,
 	translationBatches <-chan parser.TranslationBatch,
 	translations chan<- string,
 ) {
-	if config.Provider.Mistral.ApiKey != "" {
-		os.Setenv("MISTRAL_API_KEY", config.Provider.Mistral.ApiKey)
+	if config.SelectedProvider.ApiKey != "" {
+		os.Setenv("MISTRAL_API_KEY", config.SelectedProvider.ApiKey)
 	}
-	model := mistral.Chat(config.Provider.Mistral.Model)
+	model := mistral.Chat(config.SelectedProvider.Model)
 
 	for translationBatch := range translationBatches {
 		prompt := fmt.Sprintf(
-			types.SYSTEM_PROMPT,
+			configTypes.SYSTEM_PROMPT,
 			translationBatch.Context,
 			"Target language: French",
 			translationBatch.Units,
