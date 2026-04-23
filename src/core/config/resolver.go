@@ -1,13 +1,13 @@
 package config
 
 import (
-	"fmt"
 	cmdTypes "trains/src/cli/types"
 	configOptions "trains/src/core/config/options"
 	"trains/src/core/config/resolvers"
 	configTypes "trains/src/core/config/types"
 	"trains/src/core/errors"
 	lockFile "trains/src/core/lock/file"
+	lockTypes "trains/src/core/lock/types"
 )
 
 type ConfigLayers struct {
@@ -52,7 +52,6 @@ func ResolveConfig(
 	mergedConfig := MergeConfig(configs)
 
 	lockFile, err := lockFile.LoadOrCreate(mergedConfig.Lock.Path)
-	fmt.Println(lockFile)
 	if err != nil {
 		return nil, &errors.TrainsError{
 			Code:    errors.InvalidLockError,
@@ -61,7 +60,7 @@ func ResolveConfig(
 		}
 	}
 
-	runtimeConfig := buildRuntimeConfig(mergedConfig)
+	runtimeConfig := buildRuntimeConfig(mergedConfig, *lockFile)
 
 	return &runtimeConfig, nil
 }
@@ -121,23 +120,31 @@ func resolveConfigFilePath(
 }
 
 /*
+Resolves the provider configuration from the given config.
+*/
+func resolveProvider(
+	config configTypes.ConfigFile,
+) configTypes.Provider {
+	return *config.Providers[config.SelectedProvider]
+}
+
+/*
 Builds the runtime configuration from configuration files and lock file.
 */
 func buildRuntimeConfig(
 	config configTypes.ConfigFile,
+	lockFile lockTypes.LockFile,
 ) configTypes.RuntimeConfig {
-	fmt.Println(config)
-	// providerConfig := configTypes.ProviderNameToProviderConfig(provider, *config)
-	//
-	// return configTypes.RuntimeConfig{
-	// 	SelectedProvider: configTypes.Provider{
-	// 		Name:    provider,
-	// 		ApiKey:  providerConfig.ApiKey,
-	// 		Model:   providerConfig.Model,
-	// 		BaseUrl: providerConfig.BaseUrl,
-	// 		Timeout: providerConfig.Timeout,
-	// 	},
-	// 	Locks: types.CreateLockFileEntries(*lockFile),
-	// }
-	return configTypes.RuntimeConfig{}
+	provider := resolveProvider(config)
+
+	return configTypes.RuntimeConfig{
+		Batching:    config.Batching,
+		Config:      config.Config,
+		IO:          config.IO,
+		Lock:        config.Lock,
+		Prompt:      config.Prompt,
+		Provider:    provider,
+		Translation: config.Translation,
+		Locks:       lockFile.Entries,
+	}
 }

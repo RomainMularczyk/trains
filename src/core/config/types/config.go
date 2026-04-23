@@ -6,8 +6,14 @@ import (
 )
 
 type RuntimeConfig struct {
-	SelectedProvider Provider
-	Locks            []lockTypes.LockFileEntry
+	Batching    Batching
+	Config      Config
+	IO          IO
+	Lock        Lock
+	Prompt      Prompt
+	Provider    Provider
+	Translation Translation
+	Locks       map[string]lockTypes.LockFileEntry
 }
 
 type ConfigFile struct {
