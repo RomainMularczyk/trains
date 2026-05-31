@@ -1,0 +1,26 @@
+[
+    {
+        "Keys": "user.custom_bye",
+        "Target": "Au revoir, {{name}}!"
+    },
+    {
+        "Keys": "user.custom_greetings",
+        "Target": "Bonjour {{name}}, bienvenue dans l'équipe!"
+    },
+    {
+        "Keys": "grade.description",
+        "Target": "Vous avez obtenu une note de {{grade}}"
+    },
+    {
+        "Keys": "steps.0",
+        "Target": "Un"
+    },
+    {
+        "Keys": "steps.1",
+        "Target": "Deux"
+    },
+    {
+        "Keys": "steps.2",
+        "Target": "Trois"
+    }
+]

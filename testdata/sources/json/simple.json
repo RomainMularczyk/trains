@@ -1,0 +1,14 @@
+{
+    "user": {
+        "custom_greetings": "hi {{name}}, welcome to the team!",
+        "custom_bye": "see you later, {{name}}!"
+    },
+    "grade": {
+        "description": "you achieved a grade of {{grade}}"
+    },
+    "steps": [
+        "one",
+        "two",
+        "three"
+    ]
+}
