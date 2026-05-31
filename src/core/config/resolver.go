@@ -23,7 +23,7 @@ func (c ConfigLayers) String() string {
 	config, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return fmt.Sprintf(
-			"{\"default\": %s,\"file\": %s,\"env\": %s,\"cli\": %s}",
+			"{\"default\": %v,\"file\": %v,\"env\": %v,\"cli\": %v}",
 			c.Default,
 			c.File,
 			c.Env,
