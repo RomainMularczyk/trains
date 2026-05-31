@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-	"trains/src/core/parser"
+	"trains/src/core/reader/parser"
 )
 
 func collectTranslations(translationUnit <-chan parser.TranslationUnit) []parser.TranslationUnit {
