@@ -3,11 +3,11 @@ package io
 import (
 	"sync"
 	"testing"
-	"trains/src/core/config/types"
+	configTypes "trains/src/core/config/types"
 )
 
 func TestDiscoverFiles(t *testing.T) {
-	driver, err := Processor(types.JSON)
+	driver, err := Processor(configTypes.JSON)
 	if err != nil {
 		t.Errorf("Error creating reader: %v", err)
 	}
