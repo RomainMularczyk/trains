@@ -19,7 +19,7 @@ func TestDiscoverFiles(t *testing.T) {
 
 	done := make(chan error)
 	go func() {
-		done <- FileExplorerWorker("../../../tests", driver.Reader, filePaths)
+		done <- FileExplorerWorker("../../../testdata/sources/translation", driver.Reader, filePaths)
 		close(filePaths)
 	}()
 
@@ -35,7 +35,7 @@ func TestDiscoverFiles(t *testing.T) {
 	}
 	wg.Wait()
 
-	if len(files) != 1 {
-		t.Errorf("Expected 1 file, got %d", len(files))
+	if len(files) != 2 {
+		t.Errorf("Expected 2 files, got %d", len(files))
 	}
 }

@@ -9,7 +9,7 @@ func TestReadEmptyJson(t *testing.T) {
 	pathChan := make(chan string, 1)
 	contentChan := make(chan any, 1)
 
-	pathChan <- "../../../../../tests/empty.json"
+	pathChan <- "../../../../../testdata/sources/translation/empty.json"
 	close(pathChan)
 
 	reader.Read(pathChan, contentChan)
@@ -27,7 +27,7 @@ func TestReadSimpleJson(t *testing.T) {
 	pathChan := make(chan string, 1)
 	contentChan := make(chan any, 1)
 
-	pathChan <- "../../../../../tests/simple.json"
+	pathChan <- "../../../../../testdata/sources/translation/simple.json"
 	close(pathChan)
 
 	reader.Read(pathChan, contentChan)
