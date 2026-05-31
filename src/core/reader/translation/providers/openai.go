@@ -18,9 +18,9 @@ func (o *OpenAI) Name() string {
 }
 
 func (o *OpenAI) Translate(
-	config configTypes.RuntimeConfig,
 	translationBatches <-chan parser.TranslationBatch,
-	translations chan<- string,
+	translations chan<- parser.TranslationResult,
+	config configTypes.RuntimeConfig,
 ) {
 	if config.Provider.ApiKey != "" {
 		os.Setenv("OPENAI_API_KEY", config.Provider.ApiKey)
@@ -43,6 +43,9 @@ func (o *OpenAI) Translate(
 			continue
 		}
 
-		translations <- result.Text
+		translations <- parser.TranslationResult{
+			Batch:  translationBatch,
+			Result: result.Text,
+		}
 	}
 }

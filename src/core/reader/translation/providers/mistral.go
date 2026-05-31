@@ -18,9 +18,9 @@ func (m *Mistral) Name() string {
 }
 
 func (m *Mistral) Translate(
-	config configTypes.RuntimeConfig,
 	translationBatches <-chan parser.TranslationBatch,
-	translations chan<- string,
+	translations chan<- parser.TranslationResult,
+	config configTypes.RuntimeConfig,
 ) {
 	if config.Provider.ApiKey != "" {
 		os.Setenv("MISTRAL_API_KEY", config.Provider.ApiKey)
@@ -39,11 +39,13 @@ func (m *Mistral) Translate(
 			model,
 			goai.WithPrompt(prompt),
 		)
-		fmt.Println(result)
 		if err != nil {
 			continue
 		}
 
-		translations <- result.Text
+		translations <- parser.TranslationResult{
+			Batch:  translationBatch,
+			Result: result.Text,
+		}
 	}
 }

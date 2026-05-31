@@ -18,9 +18,9 @@ func (a *Anthropic) Name() string {
 }
 
 func (a *Anthropic) Translate(
-	config configTypes.RuntimeConfig,
 	translationBatches <-chan parser.TranslationBatch,
-	translations chan<- string,
+	translations chan<- parser.TranslationResult,
+	config configTypes.RuntimeConfig,
 ) {
 	if config.Provider.ApiKey != "" {
 		os.Setenv("ANTHROPIC_API_KEY", config.Provider.ApiKey)
@@ -39,11 +39,13 @@ func (a *Anthropic) Translate(
 			model,
 			goai.WithPrompt(prompt),
 		)
-		fmt.Println(result.Text)
 		if err != nil {
 			continue
 		}
 
-		translations <- result.Text
+		translations <- parser.TranslationResult{
+			Batch:  translationBatch,
+			Result: result.Text,
+		}
 	}
 }
