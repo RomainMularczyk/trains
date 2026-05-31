@@ -15,7 +15,8 @@ func (p *YAMLParser) Parse(
 	node <-chan *yamlv3.Node,
 	translationUnit chan<- parser.TranslationUnit,
 ) {
-	p.walk(node, []string{}, translationUnit)
+	n := <-node
+	p.walk(n, []string{}, translationUnit)
 }
 
 func (p *YAMLParser) walk(
