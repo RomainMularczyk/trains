@@ -46,7 +46,7 @@ func Validate(fileContent lockTypes.LockFile) *trainsError.TrainsError {
 
 			return &trainsError.TrainsError{
 				Message: fmt.Sprintf(
-					"An unexpected validation error occurred on key '%s': '%w'",
+					"An unexpected validation error occurred on key '%s': '%s'",
 					key,
 					err,
 				),
