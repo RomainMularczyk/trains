@@ -6,6 +6,7 @@ import (
 	cmdTypes "trains/src/cli/types"
 	configTypes "trains/src/core/config/types"
 	"trains/src/core/errors"
+	"trains/src/utils"
 )
 
 /*
@@ -26,11 +27,15 @@ func ProvidersFromOptions(
 			}
 		}
 
-		config[name].Name = &providerName
-		config[name].ApiKey = &options.ApiKey
-		config[name].Model = &options.Model
-		config[name].BaseUrl = &options.BaseUrl
-		config[name].Timeout = &options.Timeout
+		providerConfig := configTypes.ProviderOverrides{
+			Name:    &providerName,
+			ApiKey:  utils.EmptyToNil(&options.ApiKey),
+			Model:   utils.EmptyToNil(&options.Model),
+			BaseUrl: utils.EmptyToNil(&options.BaseUrl),
+			Timeout: &options.Timeout,
+		}
+
+		config[name] = &providerConfig
 	}
 
 	return &config, nil
@@ -205,6 +210,11 @@ func MergeProvidersConfig(
 		}
 		if destProvider, ok := (*dest)[name]; ok && destProvider != nil {
 			MergeProviderConfig(destProvider, override)
+		} else {
+			(*dest)[name] = &configTypes.Provider{
+				Name: name,
+			}
+			MergeProviderConfig((*dest)[name], override)
 		}
 	}
 }

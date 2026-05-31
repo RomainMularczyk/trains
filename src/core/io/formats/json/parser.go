@@ -3,7 +3,7 @@ package json
 import (
 	"strconv"
 	"strings"
-	"trains/src/core/parser"
+	"trains/src/core/reader/parser"
 )
 
 type JSONParser struct{}

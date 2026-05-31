@@ -8,7 +8,7 @@ import (
 func TestSegmentizeOnlyText(t *testing.T) {
 	input := "This is a test"
 	result := Segmentize(input)
-	expected := []Segment{{TextSegment, "This is a test"}}
+	expected := []Segment{{TextSegment, "This is a test", nil}}
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected segment to be %v, got %v", expected, result)
 	}

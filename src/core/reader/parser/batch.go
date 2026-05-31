@@ -23,14 +23,13 @@ func (b TranslationBatch) String() string {
 func CreateBatch(
 	translationUnit <-chan TranslationUnit,
 	translationBatches chan<- TranslationBatch,
-	tokenLimit int,
 	config configTypes.RuntimeConfig,
 ) {
 	batch := TranslationBatch{}
 
 	for unit := range translationUnit {
 		// if the batch is full, we send it to the output channel and create a new one
-		if batch.Size+batch.ContextSize > tokenLimit && len(batch.Units) > 0 {
+		if batch.Size+batch.ContextSize > config.Batching.TokenLimit && len(batch.Units) > 0 {
 			translationBatches <- batch
 			batch = TranslationBatch{}
 		}

@@ -23,6 +23,10 @@ type LockOptions struct {
 	Path    string
 }
 
+type LoggingOptions struct {
+	Level string
+}
+
 type PromptOptions struct {
 	Context string
 }
@@ -47,6 +51,7 @@ type CLIConfigOptions struct {
 	Config           ConfigOptions
 	IO               IOOptions
 	Lock             LockOptions
+	Logging          LoggingOptions
 	Prompt           PromptOptions
 	Providers        ProvidersOptions
 	SelectedProvider configTypes.ProviderName

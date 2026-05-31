@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	trainsError "trains/src/core/errors"
 	lockTypes "trains/src/core/lock/types"
 
 	"github.com/go-playground/validator/v10"
@@ -12,7 +13,7 @@ import (
 /*
 Validates the lock file.
 */
-func Validate(fileContent lockTypes.LockFile) error {
+func Validate(fileContent lockTypes.LockFile) *trainsError.TrainsError {
 	validate := validator.New()
 
 	var errorMessages []string
@@ -34,21 +35,35 @@ func Validate(fileContent lockTypes.LockFile) error {
 					)
 					continue
 				}
-				return fmt.Errorf(
-					"Configuration validation failed:\n%s",
-					strings.Join(errorMessages, "\n"),
-				)
+				return &trainsError.TrainsError{
+					Message: fmt.Sprintf(
+						"Configuration validation failed:\n%s",
+						strings.Join(errorMessages, "\n"),
+					),
+					Code: trainsError.InvalidLockError,
+				}
 			}
 
-			return fmt.Errorf("An unexpected validation error occurred on key '%s': '%w'", key, err)
+			return &trainsError.TrainsError{
+				Message: fmt.Sprintf(
+					"An unexpected validation error occurred on key '%s': '%w'",
+					key,
+					err,
+				),
+				Code: trainsError.UnexpectedError,
+				Err:  err,
+			}
 		}
 	}
 
 	if len(errorMessages) > 0 {
-		return fmt.Errorf(
-			"Configuration validation failed:\n%s",
-			strings.Join(errorMessages, "\n"),
-		)
+		return &trainsError.TrainsError{
+			Message: fmt.Sprintf(
+				"Configuration validation failed:\n%s",
+				strings.Join(errorMessages, "\n"),
+			),
+			Code: trainsError.InvalidLockError,
+		}
 	}
 
 	return nil

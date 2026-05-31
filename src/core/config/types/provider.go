@@ -23,7 +23,7 @@ const (
 type Providers map[ProviderName]*Provider
 
 type Provider struct {
-	Name    ProviderName `validate:"required"`
+	Name    ProviderName `validate:"required,oneof=openai anthropic google mistral xai deepseeker cohere perplexity openrouter minimax"`
 	ApiKey  string       `validate:"required"`
 	Model   string       `validate:"required"`
 	BaseUrl string       `validate:"required"`
@@ -75,7 +75,7 @@ func (p *Providers) Apply(o *ProvidersOverrides) {
 	}
 }
 
-func FlagToProvider(flag string) (ProviderName, error) {
+func FlagToProvider(flag string) (ProviderName, *errors.TrainsError) {
 	switch flag {
 	case "openai":
 		return OpenAI, nil

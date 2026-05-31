@@ -4,22 +4,37 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
+	cmdTypes "trains/src/cli/types"
+	configOpts "trains/src/core/config/options"
+	configTypes "trains/src/core/config/types"
 	"trains/src/core/errors"
 
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
+var verbose bool
+var loggingOptions cmdTypes.LoggingOptions
+
 var rootCmd = &cobra.Command{
 	Use:   "trains",
 	Short: "A brief description of your application",
 	Long: `A CLI tool for batch translating files between various formats.
 Supports JSON format with customizable parsing and writing options.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		level, err := configOpts.ResolveLoggingLevel(loggingOptions.Level)
+		if err != nil {
+			return err
+		}
+		bootstrapLogger := configTypes.NewLogger(*level)
+
+		ctx := context.WithValue(cmd.Context(), "logger", bootstrapLogger)
+		cmd.SetContext(ctx)
+
+		return nil
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -27,7 +42,8 @@ Supports JSON format with customizable parsing and writing options.`,
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		fmt.Println(errors.FormatError(err, false))
+		errorMsg := errors.FormatError(err, true)
+		fmt.Println(errorMsg)
 		os.Exit(1)
 	}
 }
@@ -46,4 +62,18 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	rootCmd.PersistentFlags().StringVar(
+		&loggingOptions.Level,
+		"logLevel",
+		string(configTypes.Info),
+		"Logging level",
+	)
+
+	rootCmd.PersistentFlags().BoolVar(
+		&verbose,
+		"verbose",
+		false,
+		"Enable verbose logging",
+	)
 }

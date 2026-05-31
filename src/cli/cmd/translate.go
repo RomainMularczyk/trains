@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-
+	"trains/src/core/config"
 	"trains/src/core/config/resolvers"
 	configTypes "trains/src/core/config/types"
+	"trains/src/core/orchestration"
 
 	cmdTypes "trains/src/cli/types"
 
@@ -31,26 +31,36 @@ Supports JSON input files with configurable parsing options.`,
 			return err
 		}
 		providersOptions[providerName] = providerOptions
-		fmt.Println(providersOptions)
+
+		logger := cmd.Context().Value("logger").(*configTypes.StageLogger)
+		logLevel, cmdErr := cmd.Flags().GetString("logLevel")
+		if cmdErr != nil {
+			return cmdErr
+		}
 
 		cliConfigOptions := cmdTypes.CLIConfigOptions{
-			Batching:         batchingOptions,
-			Config:           configOptions,
-			IO:               ioOptions,
-			Lock:             lockOptions,
-			Prompt:           promptOptions,
-			Providers:        providersOptions,
+			Batching: batchingOptions,
+			Config:   configOptions,
+			IO:       ioOptions,
+			Lock:     lockOptions,
+			Logging: cmdTypes.LoggingOptions{
+				Level: logLevel,
+			},
+			Prompt: promptOptions,
+			Providers: map[configTypes.ProviderName]cmdTypes.ProviderOptions{
+				providerName: providerOptions,
+			},
 			SelectedProvider: providerName,
 			Translation:      translationOptions,
 		}
-		fmt.Println(cliConfigOptions)
-		// config, err := config.ResolveConfig(cliConfigOptions)
-		// if err != nil {
-		// 	return fmt.Errorf("Invalid file format: %v", err)
-		// }
 
-		//pipe := orchestration.Pipeline{}
-		// pipe.Run(config)
+		config, err := config.ResolveConfig(cliConfigOptions, logger)
+		if err != nil {
+			return err
+		}
+
+		pipe := orchestration.Pipeline{}
+		pipe.Run(*config)
 		return nil
 	},
 }

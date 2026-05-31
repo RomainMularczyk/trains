@@ -12,21 +12,27 @@ Resolves the configuration from command line options.
 */
 func FromOptions(
 	cliConfigOptions cmdTypes.CLIConfigOptions,
+	bootstrapLogger *configTypes.StageLogger,
 ) (*configTypes.ConfigFileOverrides, *errors.TrainsError) {
+	log := bootstrapLogger.Log.With("component", "config.resolvers.options")
+
 	batchingConfig, err := configOptions.BatchingFromOptions(cliConfigOptions)
 	if err != nil {
 		return nil, err
 	}
+	log.Debug("Batching configuration resolved successfully.")
 
 	ioConfig, err := configOptions.IOFromOptions(cliConfigOptions)
 	if err != nil {
 		return nil, err
 	}
+	log.Debug("IO configuration resolved successfully.")
 
 	promptConfig, err := configOptions.PromptFromOptions(cliConfigOptions)
 	if err != nil {
 		return nil, err
 	}
+	log.Debug("Prompt configuration resolved successfully.")
 
 	providersConfig, err := configOptions.ProvidersFromOptions(cliConfigOptions)
 	if err != nil {

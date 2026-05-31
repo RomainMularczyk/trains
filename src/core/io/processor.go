@@ -4,7 +4,7 @@ import (
 	"fmt"
 	configTypes "trains/src/core/config/types"
 	"trains/src/core/io/formats/json"
-	"trains/src/core/parser"
+	"trains/src/core/reader/parser"
 )
 
 type FormatDriver struct {

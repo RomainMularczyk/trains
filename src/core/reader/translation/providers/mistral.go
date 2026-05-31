@@ -5,27 +5,27 @@ import (
 	"fmt"
 	"os"
 	"trains/src/core/config/types"
-	"trains/src/core/parser"
+	"trains/src/core/reader/parser"
 
 	"github.com/zendev-sh/goai"
-	"github.com/zendev-sh/goai/provider/openai"
+	"github.com/zendev-sh/goai/provider/mistral"
 )
 
-type OpenAI struct{}
+type Mistral struct{}
 
-func (o *OpenAI) Name() string {
-	return "OpenAI"
+func (m *Mistral) Name() string {
+	return "Mistral"
 }
 
-func (o *OpenAI) Translate(
+func (m *Mistral) Translate(
 	config configTypes.RuntimeConfig,
 	translationBatches <-chan parser.TranslationBatch,
 	translations chan<- string,
 ) {
-	if config.SelectedProvider.ApiKey != "" {
-		os.Setenv("OPENAI_API_KEY", config.SelectedProvider.ApiKey)
+	if config.Provider.ApiKey != "" {
+		os.Setenv("MISTRAL_API_KEY", config.Provider.ApiKey)
 	}
-	model := openai.Chat(config.SelectedProvider.Model)
+	model := mistral.Chat(config.Provider.Model)
 
 	for translationBatch := range translationBatches {
 		prompt := fmt.Sprintf(
@@ -39,7 +39,7 @@ func (o *OpenAI) Translate(
 			model,
 			goai.WithPrompt(prompt),
 		)
-		fmt.Println(result.Text)
+		fmt.Println(result)
 		if err != nil {
 			continue
 		}

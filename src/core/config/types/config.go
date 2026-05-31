@@ -1,7 +1,6 @@
 package configTypes
 
 import (
-	"encoding/json"
 	lockTypes "trains/src/core/lock/types"
 )
 
@@ -10,6 +9,7 @@ type RuntimeConfig struct {
 	Config      Config
 	IO          IO
 	Lock        Lock
+	Logger      *StageLogger
 	Prompt      Prompt
 	Provider    Provider
 	Translation Translation
@@ -21,6 +21,7 @@ type ConfigFile struct {
 	Config           Config
 	IO               IO
 	Lock             Lock
+	Logging          Logging
 	Prompt           Prompt
 	Providers        Providers
 	SelectedProvider ProviderName
@@ -28,39 +29,16 @@ type ConfigFile struct {
 }
 
 type ConfigFileOverrides struct {
-	Batching         *BatchingOverrides
-	IO               *IOOverrides
-	Lock             *LockOverrides
-	Prompt           *PromptOverrides
-	Providers        *ProvidersOverrides
-	SelectedProvider *ProviderName
-	Translation      *TranslationOverrides
+	Batching         *BatchingOverrides    `json:"batching,omitempty,dive"`
+	IO               *IOOverrides          `json:"io,omitempty,dive"`
+	Lock             *LockOverrides        `json:"lock,omitempty,dive"`
+	Logging          *LoggingOverrides     `json:"logging,omitempty,dive"`
+	Prompt           *PromptOverrides      `json:"prompt,omitempty,dive"`
+	Providers        *ProvidersOverrides   `json:"providers,omitempty,dive"`
+	SelectedProvider *ProviderName         `json:"selected_provider,omitempty,dive"`
+	Translation      *TranslationOverrides `json:"translation,omitempty,dive"`
 }
 
 type Config struct {
 	Path string
-}
-
-/*
-Creates a slice of lock file entries from the given lock file.
-*/
-func CreateLockFileEntries(lockFile lockTypes.LockFile) []lockTypes.LockFileEntry {
-	locks := make([]lockTypes.LockFileEntry, 0, len(lockFile.Entries))
-
-	for _, entry := range lockFile.Entries {
-		locks = append(locks, entry)
-	}
-
-	return locks
-}
-
-/*
-Format the configuration as a JSON string.
-*/
-func (c ConfigFile) String() string {
-	config, err := json.MarshalIndent(c, "", "  ")
-	if err != nil {
-		return "{}"
-	}
-	return string(config)
 }

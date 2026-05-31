@@ -6,8 +6,8 @@ type Lock struct {
 }
 
 type LockOverrides struct {
-	Version *int
-	Path    *string
+	Version *int    `validate:"required"`
+	Path    *string `validate:"required"`
 }
 
 /*

@@ -32,5 +32,7 @@ func MergeSelectedProviderConfig(
 	dest *configTypes.ProviderName,
 	overrides *configTypes.ProviderName,
 ) {
-	dest = overrides
+	if overrides != nil {
+		*dest = *overrides
+	}
 }

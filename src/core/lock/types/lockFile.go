@@ -15,8 +15,8 @@ type LockFile struct {
 }
 
 type LockFileEntry struct {
-	SourceHash      string     `json:"source_hash" validate:"required,len=32"`
-	TranslationHash string     `json:"translation_hash" validate:"required,len=32"`
+	SourceHash      string     `json:"source_hash" validate:"required,len=64"`
+	TranslationHash string     `json:"translation_hash" validate:"required,len=64"`
 	Origin          OriginName `json:"origin" validate:"required,oneof=llm human"`
 }
 

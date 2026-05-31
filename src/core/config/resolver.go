@@ -1,6 +1,8 @@
 package config
 
 import (
+	"encoding/json"
+	"fmt"
 	cmdTypes "trains/src/cli/types"
 	configOptions "trains/src/core/config/options"
 	"trains/src/core/config/resolvers"
@@ -17,6 +19,20 @@ type ConfigLayers struct {
 	CLI     configTypes.ConfigFileOverrides
 }
 
+func (c ConfigLayers) String() string {
+	config, err := json.MarshalIndent(c, "", "  ")
+	if err != nil {
+		return fmt.Sprintf(
+			"{\"default\": %s,\"file\": %s,\"env\": %s,\"cli\": %s}",
+			c.Default,
+			c.File,
+			c.Env,
+			c.CLI,
+		)
+	}
+	return string(config)
+}
+
 /*
 Resolve the configuration applying variable precedence.
 Variable precedence order:
@@ -27,11 +43,12 @@ Variable precedence order:
 */
 func ResolveConfig(
 	cliConfigOptions cmdTypes.CLIConfigOptions,
-) (*configTypes.RuntimeConfig, error) {
+	bootstrapLogger *configTypes.StageLogger,
+) (*configTypes.RuntimeConfig, *errors.TrainsError) {
 	defaultConfig := resolvers.FromDefaults()
 	configFilePath := resolveConfigFilePath(cliConfigOptions, defaultConfig)
 
-	fileConfig, err := resolvers.FromFile(configFilePath)
+	fileConfig, err := resolvers.FromFile(configFilePath, bootstrapLogger)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +57,7 @@ func ResolveConfig(
 	if err != nil {
 		return nil, err
 	}
-	cliConfig, err := resolvers.FromOptions(cliConfigOptions)
+	cliConfig, err := resolvers.FromOptions(cliConfigOptions, bootstrapLogger)
 
 	configs := ConfigLayers{
 		Default: defaultConfig,
@@ -60,36 +77,47 @@ func ResolveConfig(
 		}
 	}
 
-	runtimeConfig := buildRuntimeConfig(mergedConfig, *lockFile)
+	runtimeConfig, err := buildRuntimeConfig(mergedConfig, *lockFile)
+	if err != nil {
+		return nil, err
+	}
 
-	return &runtimeConfig, nil
+	return runtimeConfig, nil
 }
 
 func MergeConfig(
 	configs ConfigLayers,
 ) configTypes.ConfigFile {
 	config := configTypes.ConfigFile{
-		Batching:    configs.Default.Batching,
-		Config:      configs.Default.Config,
-		IO:          configs.Default.IO,
-		Lock:        configs.Default.Lock,
-		Prompt:      configs.Default.Prompt,
-		Providers:   configs.Default.Providers,
-		Translation: configs.Default.Translation,
+		Batching:         configs.Default.Batching,
+		Config:           configs.Default.Config,
+		IO:               configs.Default.IO,
+		Lock:             configs.Default.Lock,
+		Logging:          configs.Default.Logging,
+		Prompt:           configs.Default.Prompt,
+		Providers:        configs.Default.Providers,
+		SelectedProvider: configs.Default.SelectedProvider,
+		Translation:      configs.Default.Translation,
 	}
 
 	// File overrides
 	configOptions.MergeBatchingConfig(&config.Batching, configs.File.Batching)
 	configOptions.MergeIOConfig(&config.IO, configs.File.IO)
 	configOptions.MergeLockConfig(&config.Lock, configs.File.Lock)
+	configOptions.MergeLoggingConfig(&config.Logging, configs.File.Logging)
 	configOptions.MergePromptConfig(&config.Prompt, configs.File.Prompt)
 	configOptions.MergeProvidersConfig(&config.Providers, configs.File.Providers)
+	configOptions.MergeSelectedProviderConfig(
+		&config.SelectedProvider,
+		configs.File.SelectedProvider,
+	)
 	configOptions.MergeTranslationConfig(&config.Translation, configs.File.Translation)
 
 	// Env overrides
 	configOptions.MergeBatchingConfig(&config.Batching, configs.Env.Batching)
 	configOptions.MergeIOConfig(&config.IO, configs.Env.IO)
 	configOptions.MergeLockConfig(&config.Lock, configs.Env.Lock)
+	configOptions.MergeLoggingConfig(&config.Logging, configs.Env.Logging)
 	configOptions.MergePromptConfig(&config.Prompt, configs.Env.Prompt)
 	configOptions.MergeProvidersConfig(&config.Providers, configs.Env.Providers)
 	configOptions.MergeTranslationConfig(&config.Translation, configs.Env.Translation)
@@ -98,6 +126,7 @@ func MergeConfig(
 	configOptions.MergeBatchingConfig(&config.Batching, configs.CLI.Batching)
 	configOptions.MergeIOConfig(&config.IO, configs.CLI.IO)
 	configOptions.MergeLockConfig(&config.Lock, configs.CLI.Lock)
+	configOptions.MergeLoggingConfig(&config.Logging, configs.CLI.Logging)
 	configOptions.MergePromptConfig(&config.Prompt, configs.CLI.Prompt)
 	configOptions.MergeProvidersConfig(&config.Providers, configs.CLI.Providers)
 	configOptions.MergeTranslationConfig(&config.Translation, configs.CLI.Translation)
@@ -124,8 +153,54 @@ Resolves the provider configuration from the given config.
 */
 func resolveProvider(
 	config configTypes.ConfigFile,
-) configTypes.Provider {
-	return *config.Providers[config.SelectedProvider]
+) (*configTypes.Provider, *errors.TrainsError) {
+	if config.SelectedProvider == "" {
+		return nil, &errors.TrainsError{
+			Code:    errors.InvalidProviderError,
+			Message: "No provider selected. Use --provider/-p to select a provider",
+			Err:     fmt.Errorf("No provider selected"),
+		}
+	}
+
+	if config.Providers[config.SelectedProvider] == nil {
+		return nil, &errors.TrainsError{
+			Code:    errors.InvalidProviderError,
+			Message: "The provider selected does not exist",
+			Err:     fmt.Errorf("Invalid provider selected"),
+		}
+	}
+
+	return config.Providers[config.SelectedProvider], nil
+}
+
+/*
+Validates the provider configuration.
+*/
+func validateProvider(
+	provider configTypes.Provider,
+) *errors.TrainsError {
+	if provider.Model == "" {
+		return &errors.TrainsError{
+			Code:    errors.InvalidConfigError,
+			Message: "Missing provider model",
+			Err:     fmt.Errorf("Missing provider model"),
+		}
+	}
+	if provider.BaseUrl == "" {
+		return &errors.TrainsError{
+			Code:    errors.InvalidConfigError,
+			Message: "Missing provider base URL",
+			Err:     fmt.Errorf("Missing provider base URL"),
+		}
+	}
+	if provider.ApiKey == "" {
+		return &errors.TrainsError{
+			Code:    errors.InvalidConfigError,
+			Message: "Missing provider API key",
+			Err:     fmt.Errorf("Missing provider API key"),
+		}
+	}
+	return nil
 }
 
 /*
@@ -134,17 +209,27 @@ Builds the runtime configuration from configuration files and lock file.
 func buildRuntimeConfig(
 	config configTypes.ConfigFile,
 	lockFile lockTypes.LockFile,
-) configTypes.RuntimeConfig {
-	provider := resolveProvider(config)
+) (*configTypes.RuntimeConfig, *errors.TrainsError) {
+	provider, err := resolveProvider(config)
+	if err != nil {
+		return nil, err
+	}
+	err = validateProvider(*provider)
+	if err != nil {
+		return nil, err
+	}
 
-	return configTypes.RuntimeConfig{
+	logger := configTypes.NewLogger(config.Logging.Level)
+
+	return &configTypes.RuntimeConfig{
 		Batching:    config.Batching,
 		Config:      config.Config,
 		IO:          config.IO,
 		Lock:        config.Lock,
+		Logger:      logger,
 		Prompt:      config.Prompt,
-		Provider:    provider,
+		Provider:    *provider,
 		Translation: config.Translation,
 		Locks:       lockFile.Entries,
-	}
+	}, nil
 }

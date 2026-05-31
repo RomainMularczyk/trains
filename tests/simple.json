@@ -1,8 +1,7 @@
 {
     "user": {
-        "name": "Jovan",
-        "age": 30,
-        "email": "jovan@example.com"
+        "custom_greetings": "Hi {{name}}, welcome to the team!",
+        "custom_bye": "See you later, {{name}}!"
     },
     "grade": {
         "description": "You achieved a grade of {{grade}}"

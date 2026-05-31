@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"trains/src/core/config/types"
-	"trains/src/core/parser"
+	"trains/src/core/reader/parser"
 
 	"github.com/zendev-sh/goai"
 	"github.com/zendev-sh/goai/provider/anthropic"
@@ -22,10 +22,10 @@ func (a *Anthropic) Translate(
 	translationBatches <-chan parser.TranslationBatch,
 	translations chan<- string,
 ) {
-	if config.SelectedProvider.ApiKey != "" {
-		os.Setenv("ANTHROPIC_API_KEY", config.SelectedProvider.ApiKey)
+	if config.Provider.ApiKey != "" {
+		os.Setenv("ANTHROPIC_API_KEY", config.Provider.ApiKey)
 	}
-	model := anthropic.Chat(config.SelectedProvider.Model)
+	model := anthropic.Chat(config.Provider.Model)
 
 	for translationBatch := range translationBatches {
 		prompt := fmt.Sprintf(

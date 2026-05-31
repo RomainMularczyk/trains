@@ -5,8 +5,8 @@ import (
 	"sync"
 	"trains/src/core/config/types"
 	"trains/src/core/io"
-	"trains/src/core/parser"
-	"trains/src/core/translation"
+	"trains/src/core/reader/parser"
+	"trains/src/core/reader/translation"
 )
 
 type Pipeline struct{}
@@ -15,9 +15,7 @@ type Pipeline struct{}
 Run the translation pipeline.
 */
 func (p *Pipeline) Run(
-	root string,
-	format types.FileFormat,
-	config types.RuntimeConfig,
+	config configTypes.RuntimeConfig,
 ) {
 	// Create channels
 	filePaths := make(chan string)
@@ -26,9 +24,8 @@ func (p *Pipeline) Run(
 	batches := make(chan parser.TranslationBatch)
 	translations := make(chan string)
 
-	processor, err := io.Processor(format)
+	processor, err := io.Processor(config.IO.InputFormat)
 	llm := translation.NewLLM(config)
-	fmt.Println(llm)
 	if err != nil {
 		// TODO: handle error
 		fmt.Println(err)
@@ -38,10 +35,11 @@ func (p *Pipeline) Run(
 	var wg sync.WaitGroup
 	wg.Add(5)
 
+	// READ BLOCK
 	go func() {
 		defer wg.Done()
 		defer close(filePaths)
-		io.FileExplorerWorker(root, processor.Reader, filePaths)
+		io.FileExplorerWorker(config.IO.SourcePath, processor.Reader, filePaths)
 	}()
 
 	go func() {
@@ -59,7 +57,7 @@ func (p *Pipeline) Run(
 	go func() {
 		defer wg.Done()
 		defer close(batches)
-		parser.CreateBatch(translationUnits, batches, 100, config)
+		parser.CreateBatch(translationUnits, batches, config)
 	}()
 
 	go func() {
@@ -68,11 +66,7 @@ func (p *Pipeline) Run(
 		llm.Translate(config, batches, translations)
 	}()
 
-	go func() {
-		for translation := range translations {
-			fmt.Println(translation)
-		}
-	}()
+	// WRITE BLOCK
 
 	wg.Wait()
 }

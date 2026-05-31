@@ -9,8 +9,8 @@ const (
 	// IO defaults
 	DefaultInputFormat  = configTypes.JSON
 	DefaultOutputFormat = configTypes.JSON
-	DefaultSourcePath   = "./source"
-	DefaultTargetPath   = "./target"
+	DefaultSourcePath   = "./tests/simple.json"
+	DefaultTargetPath   = "./tests/output_simple.json"
 	// Config defaults
 	DefaultConfigPath = "./trains.json"
 	// Lock defaults
@@ -19,11 +19,13 @@ const (
 	// Prompt defaults
 	DefaultPromptContext = "Translate the following text"
 	// Provider defaults
-	DefaultProviderName    = configTypes.OpenAI
+	DefaultProviderName    = ""
 	DefaultProviderApiKey  = ""
-	DefaultProviderModel   = "gpt-5.2-mini"
-	DefaultProviderBaseUrl = "https://api.openai.com"
+	DefaultProviderModel   = ""
+	DefaultProviderBaseUrl = ""
 	DefaultProviderTimeout = 30
+	// Selected provider defaults
+	DefaultSelectedProvider = ""
 	// Translation defaults
 	DefaultSourceLanguage = configTypes.English
 	DefaultTargetLanguage = configTypes.French
@@ -80,7 +82,7 @@ func FromDefaults() configTypes.ConfigFile {
 		Providers: configTypes.Providers{
 			configTypes.OpenAI: &provider,
 		},
-		SelectedProvider: configTypes.OpenAI,
+		SelectedProvider: DefaultSelectedProvider,
 		Translation:      language,
 	}
 

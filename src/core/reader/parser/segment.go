@@ -8,8 +8,9 @@ const (
 )
 
 type Segment struct {
-	Type  SegmentType
-	Value string
+	Type        SegmentType
+	Value       string
+	Placeholder *Placeholder
 }
 
 func Segmentize(input string) []Segment {
@@ -21,7 +22,7 @@ func Segmentize(input string) []Segment {
 	}
 
 	if len(placeholders) == 0 {
-		return []Segment{{TextSegment, input}}
+		return []Segment{{TextSegment, input, nil}}
 	}
 
 	segments := make([]Segment, 0)
@@ -32,27 +33,31 @@ func Segmentize(input string) []Segment {
 
 		// we simply check if a placeholder is starting the segment
 		if index == 0 && placeholderStartIndex == 0 {
-			segments = append(segments, Segment{PlaceholderSegment, placeholder.Name})
+			segments = append(segments, Segment{PlaceholderSegment, placeholder.Name, &placeholder})
 			previousPlaceholderEndIndex = placeholderEndIndex
 			continue
 		}
 
 		// if the start of the next placeholder is the same as the end of the previous one
 		if placeholderStartIndex == previousPlaceholderEndIndex {
-			segments = append(segments, Segment{PlaceholderSegment, placeholder.Name})
+			segments = append(segments, Segment{PlaceholderSegment, placeholder.Name, &placeholder})
 			previousPlaceholderEndIndex = placeholderEndIndex
 			continue
 		}
 
 		textSegment := input[previousPlaceholderEndIndex:placeholderStartIndex]
-		segments = append(segments, Segment{TextSegment, textSegment}, Segment{PlaceholderSegment, placeholder.Name})
+		segments = append(
+			segments,
+			Segment{TextSegment, textSegment, nil},
+			Segment{PlaceholderSegment, placeholder.Name, &placeholder},
+		)
 		previousPlaceholderEndIndex = placeholderEndIndex
 	}
 
 	// then, we check if there is a text segment after the last placeholder (we also need to check
 	if previousPlaceholderEndIndex != len(input) {
 		textSegment := input[previousPlaceholderEndIndex:]
-		segments = append(segments, Segment{TextSegment, textSegment})
+		segments = append(segments, Segment{TextSegment, textSegment, nil})
 	}
 
 	return segments

@@ -6,15 +6,14 @@ import (
 
 	yamlv3 "gopkg.in/yaml.v3"
 
-	"trains/src/core/parser"
-	"trains/src/core/translation"
+	"trains/src/core/reader/parser"
 )
 
 type YAMLParser struct{}
 
 func (p *YAMLParser) Parse(
 	node <-chan *yamlv3.Node,
-	translationUnit chan<- translation.TranslationUnit,
+	translationUnit chan<- parser.TranslationUnit,
 ) {
 	p.walk(node, []string{}, translationUnit)
 }
@@ -22,7 +21,7 @@ func (p *YAMLParser) Parse(
 func (p *YAMLParser) walk(
 	node *yamlv3.Node,
 	path []string,
-	translationUnit chan<- translation.TranslationUnit,
+	translationUnit chan<- parser.TranslationUnit,
 ) {
 	switch node.Kind {
 
@@ -48,7 +47,7 @@ func (p *YAMLParser) walk(
 	case yamlv3.ScalarNode:
 		fullKey := strings.Join(path, ".")
 
-		unit := translation.TranslationUnit{
+		unit := parser.TranslationUnit{
 			Fullkey:  fullKey,
 			Path:     append([]string{}, path...),
 			Source:   node.Value,

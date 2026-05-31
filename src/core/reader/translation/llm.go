@@ -1,9 +1,9 @@
 package translation
 
 import (
-	"trains/src/core/config/types"
-	"trains/src/core/parser"
-	"trains/src/core/translation/providers"
+	configTypes "trains/src/core/config/types"
+	"trains/src/core/reader/parser"
+	"trains/src/core/reader/translation/providers"
 )
 
 type LLM interface {
@@ -16,7 +16,7 @@ type LLM interface {
 }
 
 func NewLLM(config configTypes.RuntimeConfig) LLM {
-	switch config.SelectedProvider.Name {
+	switch config.Provider.Name {
 	case configTypes.OpenAI:
 		return &providers.OpenAI{}
 	case configTypes.Anthropic:
