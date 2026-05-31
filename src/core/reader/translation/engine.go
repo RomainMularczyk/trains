@@ -9,9 +9,9 @@ import (
 type LLM interface {
 	Name() string
 	Translate(
-		config configTypes.RuntimeConfig,
 		translationBatches <-chan parser.TranslationBatch,
-		translations chan<- string,
+		translations chan<- parser.TranslationResult,
+		config configTypes.RuntimeConfig,
 	)
 }
 
