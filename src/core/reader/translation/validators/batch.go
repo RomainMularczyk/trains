@@ -3,12 +3,9 @@ package translationValidator
 import (
 	"encoding/json"
 	"fmt"
-	"slices"
-
+	"github.com/go-playground/validator/v10"
 	trainsError "trains/src/core/errors"
 	"trains/src/core/reader/parser"
-
-	"github.com/go-playground/validator/v10"
 )
 
 type BatchValidator struct{}
@@ -64,52 +61,6 @@ func (b *BatchValidator) length(
 	}
 
 	return nil
-}
-
-/*
-Validates the keys of the translation result.
-*/
-func (b *BatchValidator) keys(
-	translationEntries []parser.TranslationEngineEntry,
-	translationResult parser.TranslationResult,
-) *trainsError.TrainsError {
-	var keysInSourceFile []string
-	for _, translationUnit := range translationResult.Batch.Units {
-		keysInSourceFile = append(keysInSourceFile, translationUnit.Fullkey)
-	}
-
-	for _, translationEntry := range translationEntries {
-		if !slices.Contains(keysInSourceFile, translationEntry.Key) {
-			return &trainsError.TrainsError{
-				Code: trainsError.TranslationEntryError,
-				Message: fmt.Sprintf(
-					`Failed to validate translation result. 
-					The key %s is not present in the source file.`,
-					translationEntry.Key,
-				),
-				Err: nil,
-			}
-		}
-	}
-
-	return nil
-}
-
-/*
-Verifies that each placeholder detected in the target file is also
-present in the source file.
-*/
-func (b *BatchValidator) isPlaceholderInSource() {
-}
-
-/*
-Verifies that each placeholder present in the source file is also
-detected in the target file.
-*/
-func (b *BatchValidator) isPlaceholderInTarget() {
-}
-
-func (b *BatchValidator) values() {
 }
 
 /*

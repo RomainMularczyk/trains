@@ -2,6 +2,7 @@ package translationValidator
 
 import (
 	"fmt"
+	"slices"
 	trainsError "trains/src/core/errors"
 	"trains/src/core/reader/parser"
 )
@@ -13,6 +14,35 @@ type PlaceholderMatch struct {
 }
 
 type PlaceholderSet map[string]struct{}
+
+/*
+Validates the keys of the translation result.
+*/
+func (b *BatchValidator) keys(
+	translationEntries []parser.TranslationEngineEntry,
+	translationResult parser.TranslationResult,
+) *trainsError.TrainsError {
+	var keysInSourceFile []string
+	for _, translationUnit := range translationResult.Batch.Units {
+		keysInSourceFile = append(keysInSourceFile, translationUnit.Fullkey)
+	}
+
+	for _, translationEntry := range translationEntries {
+		if !slices.Contains(keysInSourceFile, translationEntry.Key) {
+			return &trainsError.TrainsError{
+				Code: trainsError.TranslationEntryError,
+				Message: fmt.Sprintf(
+					`Failed to validate translation result. 
+					The key %s is not present in the source file.`,
+					translationEntry.Key,
+				),
+				Err: nil,
+			}
+		}
+	}
+
+	return nil
+}
 
 /*
 Compares two PlaceholderSets and returns a detail of the differences.
@@ -118,6 +148,9 @@ func isPlaceholderInSource(
 	}
 
 	return entryErrors
+}
+
+func (b *BatchValidator) values() {
 }
 
 /*
