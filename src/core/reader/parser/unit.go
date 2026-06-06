@@ -30,6 +30,21 @@ func (t TranslationUnit) String() string {
 }
 
 /*
+Retrieves all the placeholders from the TranslationUnit.
+*/
+func (t *TranslationUnit) GetPlaceholders() *[]Placeholder {
+	var placeholders []Placeholder
+
+	for _, segment := range t.Segments {
+		if segment.Type == PlaceholderSegment {
+			placeholders = append(placeholders, *segment.Placeholder)
+		}
+	}
+
+	return &placeholders
+}
+
+/*
 Estimates the number of tokens in the TranslationUnit.
 */
 func (t *TranslationUnit) EstimateTokenNumber() int {

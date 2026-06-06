@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+// --------------------------------------------------------------
+// DetectPlaceholders
+// --------------------------------------------------------------
+
 func TestDetectPlaceholdersWithUnderscores(t *testing.T) {
 	input := "This is a {{a_placeholder}}"
 	result := DetectPlaceholders(input)
@@ -171,5 +175,33 @@ func TestDetectNoPlaceholderWhenSpaceSeperated(t *testing.T) {
 	expected := []Placeholder{}
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v, got %v", expected, result)
+	}
+}
+
+// --------------------------------------------------------------
+// GetPlaceholders
+// --------------------------------------------------------------
+
+func TestRetrievePlaceholders(t *testing.T) {
+	input := TranslationUnit{
+		Fullkey: "user.name",
+		Path:    []string{"user", "name"},
+		Source:  "My name is {{name}}",
+		Target:  "",
+		Segments: []Segment{
+			{TextSegment, "My name is ", nil},
+			{PlaceholderSegment, "name",
+				&Placeholder{
+					Name:           "name",
+					NameIndices:    []int{19, 24},
+					Pattern:        "{{name}}",
+					PatternIndices: []int{17, 25}},
+			},
+		},
+	}
+	result := input.GetPlaceholders()
+
+	if len(*result) != 1 {
+		t.Errorf("Expected 1 placeholder, got %d", len(*result))
 	}
 }
