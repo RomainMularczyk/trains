@@ -3,6 +3,7 @@ package translationValidator
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	trainsError "trains/src/core/errors"
 	"trains/src/core/reader/parser"
@@ -24,7 +25,7 @@ func (b *BatchValidator) structure(
 	for _, translationEntry := range jsonTranslation {
 		if err := validate.Struct(translationEntry); err != nil {
 			return nil, &trainsError.TrainsError{
-				Code: trainsError.TranslationError,
+				Code: trainsError.TranslationBatchError,
 				Message: fmt.Sprintf(
 					"Failed to validate translation result. %s",
 					err,
@@ -45,11 +46,18 @@ func (b *BatchValidator) length(
 	translationEntries []parser.TranslationEngineEntry,
 	translationResult parser.TranslationResult,
 ) *trainsError.TrainsError {
-	if len(translationEntries) != len(translationResult.Batch.Units) {
+	numUnits := len(translationResult.Batch.Units)
+	numEntries := len(translationEntries)
+
+	if numUnits != numEntries {
 		return &trainsError.TrainsError{
-			Code: trainsError.TranslationError,
+			Code: trainsError.TranslationBatchError,
 			Message: fmt.Sprintf(
-				"Failed to validate translation result. The number of units does not match the number of entries.",
+				`Failed to validate translation result. 
+				The number of units does not match the number of entries.
+				Reveived %d translation entries, expected %d.`,
+				numEntries,
+				numUnits,
 			),
 			Err: nil,
 		}
@@ -58,13 +66,50 @@ func (b *BatchValidator) length(
 	return nil
 }
 
-func (b *BatchValidator) Keys() {
+/*
+Validates the keys of the translation result.
+*/
+func (b *BatchValidator) keys(
+	translationEntries []parser.TranslationEngineEntry,
+	translationResult parser.TranslationResult,
+) *trainsError.TrainsError {
+	var keysInSourceFile []string
+	for _, translationUnit := range translationResult.Batch.Units {
+		keysInSourceFile = append(keysInSourceFile, translationUnit.Fullkey)
+	}
+
+	for _, translationEntry := range translationEntries {
+		if !slices.Contains(keysInSourceFile, translationEntry.Key) {
+			return &trainsError.TrainsError{
+				Code: trainsError.TranslationEntryError,
+				Message: fmt.Sprintf(
+					`Failed to validate translation result. 
+					The key %s is not present in the source file.`,
+					translationEntry.Key,
+				),
+				Err: nil,
+			}
+		}
+	}
+
+	return nil
 }
 
-func (b *BatchValidator) Placeholders() {
+/*
+Verifies that each placeholder detected in the target file is also
+present in the source file.
+*/
+func (b *BatchValidator) isPlaceholderInSource() {
 }
 
-func (b *BatchValidator) Values() {
+/*
+Verifies that each placeholder present in the source file is also
+detected in the target file.
+*/
+func (b *BatchValidator) isPlaceholderInTarget() {
+}
+
+func (b *BatchValidator) values() {
 }
 
 /*
@@ -77,21 +122,30 @@ func (b *BatchValidator) Validate(
 	for translation := range translations {
 		var rawTranslationOutput []parser.TranslationEngineEntry
 		parsingError := json.Unmarshal([]byte(translation.Result), &rawTranslationOutput)
-		translation.Error = &trainsError.TrainsError{
-			Code: trainsError.TranslationError,
-			Message: fmt.Sprintf(
-				"Failed to parse the translation result. %s",
-				parsingError,
-			),
-			Err: parsingError,
-		}
+		translation.ValidationErrors.Response = append(
+			translation.ValidationErrors.Response,
+			&trainsError.TrainsError{
+				Code: trainsError.TranslationBatchError,
+				Message: fmt.Sprintf(
+					"Failed to parse the translation result. %s",
+					parsingError,
+				),
+				Err: parsingError,
+			},
+		)
 
 		validatedTranslation, err := b.structure(rawTranslationOutput)
-		translation.Error = err
-		translation.Validated = validatedTranslation
+		translation.ValidationErrors.Batch = append(translation.ValidationErrors.Batch, err)
+		translation.Validated = *validatedTranslation
 
 		err = b.length(rawTranslationOutput, translation)
-		translation.Error = err
+		translation.ValidationErrors.Batch = append(translation.ValidationErrors.Batch, err)
+
+		err = b.keys(rawTranslationOutput, translation)
+		translation.ValidationErrors.Entry = append(translation.ValidationErrors.Batch, err)
+
+		placeholderErrors := b.placeholders(rawTranslationOutput, translation)
+		translation.ValidationErrors.Entry = append(translation.ValidationErrors.Entry, placeholderErrors...)
 
 		validatedTranslations <- translation
 	}

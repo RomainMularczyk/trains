@@ -13,6 +13,19 @@ type Placeholder struct {
 
 var pattern = regexp.MustCompile(`\{\{\s*([a-zA-Z0-9_]+)\s*\}\}`)
 
+/*
+Compares two placeholders.
+*/
+func (p *Placeholder) Compare(placeholder Placeholder) bool {
+	if p.Name == placeholder.Name {
+		return true
+	}
+	return false
+}
+
+/*
+Detects all the placeholders in the input string.
+*/
 func DetectPlaceholders(input string) []Placeholder {
 	indices := pattern.FindAllStringSubmatchIndex(input, -1)
 
