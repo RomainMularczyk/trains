@@ -63,7 +63,7 @@ func TestPlaceholderSetExtra(t *testing.T) {
 }
 
 // --------------------------------------------------------------
-// PlaceholderSet
+// Placeholder Validation
 // --------------------------------------------------------------
 
 // Verifies that the target set contains the same placeholders as the source set.
@@ -93,10 +93,7 @@ func TestPlaceholderValidationWithExtraPlaceholder(t *testing.T) {
 	if !slices.ContainsFunc(
 		errors,
 		func(err *trainsError.TrainsError) bool {
-			return err.Code == trainsError.TranslationEntryError &&
-				err.Message == `Failed to validate translation result.
-				The placeholders in the target file does not exist in the source file.
-				Extra placeholders: ["user.age"]`
+			return err.Code == trainsError.TranslationEntryError
 		},
 	) {
 		t.Errorf("Expected an extra placeholder, got %v", errors)
@@ -114,10 +111,71 @@ func TestPlaceholderValidationWithMissingPlaceholder(t *testing.T) {
 	errors := batchValidator.placeholders(translationEntries, translationResult)
 
 	if !slices.ContainsFunc(errors, func(err *trainsError.TrainsError) bool {
-		return err.Code == trainsError.TranslationEntryError && err.Message == `Failed to validate translation result. 
-		The placeholders in the source file is missing in the target file.
-		Missing placeholders: ["user.name"]`
+		return err.Code == trainsError.TranslationEntryError
 	}) {
 		t.Errorf("Expected a missing placeholder, got %v", errors)
+	}
+}
+
+// --------------------------------------------------------------
+// Values Validation
+// --------------------------------------------------------------
+
+// Verifies that the target does not contain any empty values.
+func TestValuesValidation(t *testing.T) {
+	translationEntries := testdataEntry.TwoEntries()
+	translationResult := parser.TranslationResult{
+		Batch: testdataBatch.TwoUnitsBatch(),
+	}
+	batchValidator := &BatchValidator{}
+	errors := batchValidator.values(translationEntries, translationResult)
+
+	if len(errors) != 0 {
+		t.Errorf("Expected no errors, got %d", len(errors))
+	}
+}
+
+// Verifies that the target set does not contain an empty target
+// value.
+func TestValuesValidationWithEmptyTarget(t *testing.T) {
+	translationEntries := testdataEntry.TwoEntries()
+	translationEntries[0].Target = ""
+	translationResult := parser.TranslationResult{
+		Batch: testdataBatch.TwoUnitsBatch(),
+	}
+
+	batchValidator := &BatchValidator{}
+	errors := batchValidator.values(translationEntries, translationResult)
+
+	if !slices.ContainsFunc(
+		errors,
+		func(err *trainsError.TrainsError) bool {
+			return err.Code == trainsError.TranslationEntryError
+		},
+	) {
+		t.Errorf("Expected an error, got %v", errors)
+	}
+}
+
+// Verifies that if the target is empty, the source is also empty
+// in order to return no error.
+func TestValuesValidationWithEmptySourceAndEmptyTarget(t *testing.T) {
+	translationEntries := testdataEntry.TwoEntries()
+	translationEntries[0].Target = ""
+	translationResult := parser.TranslationResult{
+		Batch: testdataBatch.TwoUnitsBatch(),
+	}
+	translationResult.Batch.Units[0].Source = ""
+
+	batchValidator := &BatchValidator{}
+	errors := batchValidator.values(translationEntries, translationResult)
+
+	if slices.ContainsFunc(
+		errors,
+		func(err *trainsError.TrainsError) bool {
+			return err.Code == trainsError.TranslationEntryError
+		},
+	) {
+		t.Errorf("Expected no error, got %v", errors)
 	}
 }

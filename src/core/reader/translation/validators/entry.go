@@ -21,15 +21,16 @@ Validates the keys of the translation result.
 func (b *BatchValidator) keys(
 	translationEntries []parser.TranslationEngineEntry,
 	translationResult parser.TranslationResult,
-) *trainsError.TrainsError {
+) []*trainsError.TrainsError {
 	var keysInSourceFile []string
 	for _, translationUnit := range translationResult.Batch.Units {
 		keysInSourceFile = append(keysInSourceFile, translationUnit.Fullkey)
 	}
 
+	var entryErrors []*trainsError.TrainsError
 	for _, translationEntry := range translationEntries {
 		if !slices.Contains(keysInSourceFile, translationEntry.Key) {
-			return &trainsError.TrainsError{
+			entryErrors = append(entryErrors, &trainsError.TrainsError{
 				Code: trainsError.TranslationEntryError,
 				Message: fmt.Sprintf(
 					`Failed to validate translation result. 
@@ -37,11 +38,44 @@ func (b *BatchValidator) keys(
 					translationEntry.Key,
 				),
 				Err: nil,
-			}
+			})
 		}
 	}
 
 	return nil
+}
+
+/*
+Validates that the target translation is not empty if the source translation
+is not empty.
+*/
+func (b *BatchValidator) values(
+	translationEntries []parser.TranslationEngineEntry,
+	translationResult parser.TranslationResult,
+) []*trainsError.TrainsError {
+	var entryErrors []*trainsError.TrainsError
+
+	for _, translationEntry := range translationEntries {
+		if translationEntry.Target == "" {
+			for _, translationUnit := range translationResult.Batch.Units {
+				if translationUnit.Fullkey == translationEntry.Key {
+					if translationUnit.Source != "" {
+						entryErrors = append(entryErrors, &trainsError.TrainsError{
+							Code: trainsError.TranslationEntryError,
+							Message: fmt.Sprintf(
+								`Failed to validate translation result. 
+								The target of the entry %s is empty.`,
+								translationEntry.Key,
+							),
+							Err: nil,
+						})
+					}
+				}
+			}
+		}
+	}
+
+	return entryErrors
 }
 
 /*
@@ -148,9 +182,6 @@ func isPlaceholderInSource(
 	}
 
 	return entryErrors
-}
-
-func (b *BatchValidator) values() {
 }
 
 /*
