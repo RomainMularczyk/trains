@@ -8,8 +8,14 @@ type TranslationEngineEntry struct {
 }
 
 type TranslationResult struct {
-	Batch     TranslationBatch
-	Result    string
-	Validated *[]TranslationEngineEntry
-	Error     *trainsError.TrainsError
+	Batch            TranslationBatch
+	Result           string
+	Validated        []TranslationEngineEntry
+	ValidationErrors *TranslationValiationErrors
+}
+
+type TranslationValiationErrors struct {
+	Response []*trainsError.TrainsError
+	Batch    []*trainsError.TrainsError
+	Entry    []*trainsError.TrainsError
 }
