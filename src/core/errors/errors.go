@@ -16,7 +16,9 @@ const (
 	FileNotAccessible Code = "FILE_NOT_ACCESSIBLE"
 	UnexpectedError   Code = "UNEXPECTED_ERROR"
 
-	TranslationError Code = "TRANSLATION_ERROR"
+	TranslationBatchError    Code = "TRANSLATION_ERROR"
+	TranslationResponseError Code = "TRANSLATION_RESPONSE_ERROR"
+	TranslationEntryError    Code = "TRANSLATION_ENTRY_ERROR"
 )
 
 type TrainsError struct {
