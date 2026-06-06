@@ -5,8 +5,8 @@ import (
 	testdataUnit "trains/testdata/sources/unit"
 )
 
-func SimpleBatch() parser.TranslationBatch {
-	units := testdataUnit.SimpleTranslationUnits()
+func OneUnitBatch() parser.TranslationBatch {
+	units := testdataUnit.OneUnit()
 
 	var numberOfTokens int
 	for _, unit := range units {

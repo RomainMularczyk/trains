@@ -1,4 +1,4 @@
-package testdata
+package testdataUnit
 
 import "trains/src/core/reader/parser"
 
